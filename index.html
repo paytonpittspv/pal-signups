@@ -397,6 +397,13 @@ try {
   const todoWhy = ev => ev.draft ? 'Still editing' : 'Needs ' + missing(ev).join(' + ');
   const tent = ev => (ev.tentative ? ' <span class="pill tent">Tentative</span>' : '') + (isDraft(ev) ? ` <span class="pill red">${esc(todoWhy(ev))}</span>` : '');
 
+  const palState = (ev, people, past) => {
+    const n = people.filter(p => p.role !== 'lead').length, cap = capOf(ev, 'pal'), fin = isFinite(cap);
+    return { n, cap, open: fin ? Math.max(0, cap - n) : null, needs: !past && (fin ? n < cap : n === 0) };
+  };
+  const needsPeople = (ev, people) => { const past = ev.date && ev.date < today(); return !past && (!people.some(p => p.role === 'lead') || palState(ev, people, past).needs); };
+  const openTxt = ps => ps.open == null ? 'Needs PALs' : ps.open + ' PAL spot' + (ps.open === 1 ? '' : 's') + ' open';
+
   function coverage(ev, people, me, past) {
     const leads = people.filter(p => p.role === 'lead'), pals = people.filter(p => p.role !== 'lead');
     const palCap = capOf(ev, 'pal');
@@ -407,7 +414,8 @@ try {
     const n = pals.length;
     const sub = isFinite(palCap) ? `${n}/${palCap} PALs` : (n ? `${n} PAL${n === 1 ? '' : 's'}` : (past ? '' : 'No PALs yet'));
     const full = !past && isFinite(palCap) && n >= palCap ? ' <span class="pill full">Full</span>' : '';
-    return `<span class="row-cov">${top}${sub ? `<span class="cov-sub">${sub}${full}</span>` : ''}${isIn(people, me) ? '<span class="pill me">You\'re in</span>' : ''}</span>`;
+    const ps = palState(ev, people, past), openPill = ps.needs ? ` <span class="pill warn">${openTxt(ps)}</span>` : '';
+    return `<span class="row-cov">${top}${sub || openPill ? `<span class="cov-sub">${sub}${full}${openPill}</span>` : ''}${isIn(people, me) ? '<span class="pill me">You\'re in</span>' : ''}</span>`;
   }
 
   function rowHTML(ev, people, me) {
@@ -450,7 +458,7 @@ try {
         <h4>Lead PAL${capTxt(leads.length, leadCap)} ${fullPill(leads.length, leadCap)}</h4>${leads.length ? `<ul class="chips">${chipsHTML(leads, me, rosterRemove, admin)}</ul>` : `<p class="empty-roster">${past ? 'None listed.' : 'Nobody yet. This event needs a lead.'}</p>`}
       </div>
       <div class="roster">
-        <h4>PALs${capTxt(pals.length, palCap)} ${fullPill(pals.length, palCap)}</h4>${pals.length ? `<ul class="chips">${chipsHTML(pals, me, rosterRemove, admin)}</ul>` : `<p class="empty-roster">${past ? 'None listed.' : 'Nobody yet.'}</p>`}
+        <h4>PALs${capTxt(pals.length, palCap)} ${fullPill(pals.length, palCap)}${palState(ev, people, past).needs ? ` <span class="pill warn">${openTxt(palState(ev, people, past))}</span>` : ''}</h4>${pals.length ? `<ul class="chips">${chipsHTML(pals, me, rosterRemove, admin)}</ul>` : `<p class="empty-roster">${past ? 'None listed.' : 'Nobody yet.'}</p>`}
       </div>`;
     let signup = '';
     if (admin) {
@@ -570,11 +578,12 @@ try {
     const isCal = view.tab === 'calendar';
     const scoped = view.tab === 'all' || isCal ? list : list.filter(e => e.committee === view.tab);
     const pastCount = scoped.filter(e => (e.date && e.date < t)).length;
-    const todoCount = scoped.filter(isDraft).length;
+    const todoCount = scoped.filter(isDraft).length, needCount = scoped.filter(e => needsPeople(e, by[e.id] || [])).length;
     const canW = state.canWrite !== false && !!state.db;
     $('#toolbar').innerHTML = isCal
       ? `<span class="sp"></span><button class="btn primary" data-action="add"${canW ? '' : ' disabled'}>Add event</button>`
       : `<label class="check"><input type="checkbox" id="t-past" data-toggle="past"${view.showPast ? ' checked' : ''}> Show past events${pastCount ? ' (' + pastCount + ')' : ''}</label>
+      <label class="check"><input type="checkbox" data-toggle="need"${view.need ? ' checked' : ''}> <span style="color:var(--warn-fg);font-weight:700;background:var(--warn-bg);padding:1px 6px;border-radius:3px">Needs PALs${needCount ? ' (' + needCount + ')' : ''}</span></label>
       <label class="check"><input type="checkbox" data-toggle="todo"${view.todo ? ' checked' : ''}> <span style="color:var(--red);font-weight:700">Only unfinished${todoCount ? ' (' + todoCount + ')' : ''}</span></label>
       <label class="check"><input type="checkbox" id="t-mine" data-toggle="mine"${view.mine ? ' checked' : ''}${me ? '' : ' disabled'}> Only events I'm on</label>
       <span class="sp"></span>
@@ -582,6 +591,7 @@ try {
 
     let items = scoped.filter(e => view.showPast || (!e.date || e.date >= t));
     if (view.todo) items = items.filter(isDraft);
+    if (view.need) items = items.filter(e => needsPeople(e, by[e.id] || []));
     if (view.mine && me) items = items.filter(e => isIn(by[e.id], me));
 
     let html = '';
@@ -943,17 +953,19 @@ try {
     newPage(true);
     // summary tiles
     const allP = evs.flatMap(e => by[e.id] || []);
+    const up = evs.filter(e => !e.date || e.date >= t);
     const stats = [
       [String(evs.length), 'EVENTS'],
-      [String(allP.filter(p => p.role === 'lead').length), 'LEAD PAL SIGN-UPS'],
-      [String(allP.filter(p => p.role !== 'lead').length), 'PAL SIGN-UPS'],
-      [String(evs.filter(e => (!e.date || e.date >= t) && !(by[e.id] || []).some(p => p.role === 'lead')).length), 'UPCOMING NEED A LEAD']
+      [String(allP.length), 'SIGN-UPS'],
+      [String(up.filter(e => !(by[e.id] || []).some(p => p.role === 'lead')).length), 'NEED A LEAD'],
+      [String(up.filter(e => palState(e, by[e.id] || [], false).needs).length), 'NEED PALS'],
+      [String(up.reduce((a, e) => a + (palState(e, by[e.id] || [], false).open || 0), 0)), 'OPEN PAL SPOTS']
     ];
-    const tileW = (CW - 30) / 4;
+    const tileW = (CW - 40) / 5;
     stats.forEach((s, i) => {
       const x = M + i * (tileW + 10);
       rect(x, y, tileW, 62, PAL.sand);
-      rect(x, y, 4, 62, i === 3 ? PAL.lemon : PAL.green);
+      rect(x, y, 4, 62, i >= 2 ? PAL.lemon : PAL.green);
       text(s[0], x + 16, y + 38, 28, 'b', PAL.evergreen);
       text(s[1], x + 16, y + 54, 7.5, 'b', PAL.slate);
     });
@@ -983,7 +995,8 @@ try {
       const leadLbl = 'LEAD PAL' + (isFinite(leadCap) ? '  ' + leads.length + '/' + leadCap : '');
       const palLbl = 'PALS' + (isFinite(palCap) ? '  ' + pals.length + '/' + palCap : (pals.length ? '  ' + pals.length : ''));
       const leadLines = leads.length ? wrapText(leads.map(who_).join(', '), cWid - LAB, 10, 'f') : [''];
-      const palLines = pals.length ? wrapText(pals.map(who_).join(', '), cWid - LAB, 10, 'f') : [''];
+      const ps_ = palState(ev, people, past), openLbl = ps_.needs ? (ps_.open == null ? 'NEEDS PALS' : ps_.open + (ps_.open === 1 ? ' PAL SPOT OPEN' : ' PAL SPOTS OPEN')) : '', openW = openLbl ? tw(openLbl, 7.5, 'b') + 12 : 0;
+      const palLines = pals.length ? wrapText(pals.map(who_).join(', '), cWid - LAB - (openW ? openW + 8 : 0), 10, 'f') : [''];
       const h = Math.max(70, 10 + titleLines.length * 16 + 2 + metaLines.length * 12 + (noteLines.length ? noteLines.length * 11 + 2 : 0) + 8 + leadLines.length * 14 + 2 + palLines.length * 14 + 10);
       const newMonth = monthKey !== lastMonth;
       if (y + (newMonth ? 26 : 0) + h > BOTTOM) { newPage(false); lastMonth = ''; }
@@ -1019,7 +1032,9 @@ try {
       // pal row
       text(palLbl, x0, cy + 9, 7.5, 'b', PAL.slate);
       if (pals.length) palLines.forEach((ln, i) => text(ln, x0 + LAB, cy + 9 + i * 14, 10, 'f', PAL.ink));
+      else if (openLbl) { rect(x0 + LAB, cy, openW, 13, PAL.lemon); text(openLbl, x0 + LAB + 6, cy + 9.5, 7.5, 'b', PAL.ink); }
       else text(past ? 'None listed' : 'No PALs yet', x0 + LAB, cy + 9, 10, 'f', PAL.slate);
+      if (pals.length && openLbl) { rect(M + CW - 10 - openW, cy, openW, 13, PAL.lemon); text(openLbl, M + CW - 10 - openW + 6, cy + 9.5, 7.5, 'b', PAL.ink); }
       y += h + 8;
     }
 
@@ -1092,7 +1107,8 @@ try {
     if (!e.target.closest('.menu-wrap')) closeMenu();
     const dt = e.target.closest('[data-toggle]');
     if (dt) {
-      if (dt.dataset.toggle === 'todo') { view.todo = dt.checked; }
+      if (dt.dataset.toggle === 'need') { view.need = dt.checked; }
+      else if (dt.dataset.toggle === 'todo') { view.todo = dt.checked; }
       else if (dt.dataset.toggle === 'past') { view.showPast = dt.checked; store.set('pal-past', dt.checked ? '1' : '0'); }
       else view.mine = dt.checked;
       render(); return;
