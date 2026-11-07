@@ -11,7 +11,7 @@
   --bg:#ffffff; --surface:#f7f6ea; --line:#e0ddc0; --fg:#303434; --muted:#466069;
   --storm:#006484; --storm-t:#006484; --green:#006747; --green-t:#005432; --gold:#cfc493; --gold-t:#6e6320;
   --accent:#006747; --accent-h:#005432; --accent-t:#005432; --on:#ffffff;
-  --lemon:#dbe442; --ink:#303434; --warn-bg:#f1f4b4; --warn-fg:#3d4a00; --focus:#006484; --scrim:rgba(48,52,52,.6);
+  --red:#c8102e; --lemon:#dbe442; --ink:#303434; --warn-bg:#f1f4b4; --warn-fg:#3d4a00; --focus:#006484; --scrim:rgba(48,52,52,.6);
   color-scheme:light;
   --display:'Barlow Condensed','Arial Narrow',Arial,sans-serif;
   --body:'Barlow',system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-serif;
@@ -101,6 +101,10 @@ input:focus,select:focus{border-color:var(--focus)}
 .pill{display:inline-block;font:600 12px var(--body);border-radius:999px;padding:1px 9px;white-space:nowrap}
 .pill.warn{background:var(--warn-bg);color:var(--warn-fg)}
 .pill.me{background:var(--fg);color:var(--bg)}
+.pill.red{background:var(--red);color:#fff;font-weight:700}
+.card.todo,.row.todo{box-shadow:inset 5px 0 0 var(--red)}
+.cal-ev.todo{box-shadow:inset 0 0 0 2px var(--red)}
+.tile.tbd{font-size:13px}
 .pill.tent{background:var(--surface);color:var(--muted);border:1px dashed var(--muted)}
 .pill.full{background:var(--surface);color:var(--muted);border:1px solid var(--line)}
 .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,440px),1fr));gap:14px;margin-top:12px}
@@ -252,8 +256,8 @@ input:focus,select:focus{border-color:var(--focus)}
         <label class="field full"><span>Event name</span><input id="f-title" required maxlength="80"></label>
         <label class="field full"><span>Committee</span>
           <select id="f-committee"><option value="htc">#HowToCollege</option><option value="cohort">Cohort Events</option><option value="meetgo">Meet &amp; Go's</option></select></label>
-        <label class="field full"><span>Date</span><input id="f-date" type="date" required></label>
-        <label class="field"><span>Event starts</span><input id="f-start" type="time" required></label>
+        <label class="field full"><span>Date (blank if not set yet)</span><input id="f-date" type="date"></label>
+        <label class="field"><span>Event starts</span><input id="f-start" type="time"></label>
         <label class="field"><span>Event ends</span><input id="f-end" type="time"></label>
         <label class="field"><span>PALs arrive</span><input id="f-pstart" type="time"></label>
         <label class="field"><span>PALs leave</span><input id="f-pend" type="time"></label>
@@ -263,6 +267,7 @@ input:focus,select:focus{border-color:var(--focus)}
         <label class="field full"><span>Attire</span><input id="f-attire" maxlength="100"></label>
         <label class="field full"><span>Notes (optional)</span><input id="f-notes" maxlength="200"></label>
         <label class="check full"><input type="checkbox" id="f-tent"> Tentative, details may change</label>
+        <label class="check full"><input type="checkbox" id="f-draft"> Flag in red: this event is still being edited</label>
       </div>
       <div class="btns">
         <span class="btns"><button class="btn primary" type="submit" id="f-save">Save event</button>
@@ -369,7 +374,7 @@ try {
     return { w: DAYS[d.getDay()], m: MONTHS[d.getMonth()], ml: MONTHS_LONG[d.getMonth()], d: d.getDate(), y: d.getFullYear() };
   }
   const longDate = iso => { const d = dparts(iso); return d.w + ', ' + d.m + ' ' + d.d + ', ' + d.y; };
-  const evSort = (a, b) => (a.date || '').localeCompare(b.date || '') || (a.start || '').localeCompare(b.start || '') || (a.title || '').localeCompare(b.title || '');
+  const evSort = (a, b) => (a.date ? 0 : 1) - (b.date ? 0 : 1) || (a.date || '').localeCompare(b.date || '') || (a.start || '').localeCompare(b.start || '') || (a.title || '').localeCompare(b.title || '');
   const capOf = (ev, role) => { const n = Number(role === 'lead' ? ev.maxLeads : ev.maxPals); return n > 0 ? n : Infinity; };
   const capTxt = (n, cap) => isFinite(cap) ? ' (' + n + '/' + cap + ')' : (n ? ' (' + n + ')' : '');
 
@@ -385,9 +390,12 @@ try {
   const isIn = (people, me) => !!me && (people || []).some(p => slug(p.name) === me);
 
   /* ---------- html builders ---------- */
-  const tile = ev => { const d = dparts(ev.date); return `<span class="tile c-${esc(ev.committee)}"><span class="m">${d.m}</span><span class="d">${d.d}</span><span class="w">${d.w}</span></span>`; };
+  const tile = ev => { if (!ev.date) return `<span class="tile tbd c-${esc(ev.committee)}"><span class="d">TBD</span></span>`; const d = dparts(ev.date); return `<span class="tile c-${esc(ev.committee)}"><span class="m">${d.m}</span><span class="d">${d.d}</span><span class="w">${d.w}</span></span>`; };
   const chip = c => `<span class="chip c-${esc(c)}">${esc(COMMITTEES[c] || c)}</span>`;
-  const tent = ev => ev.tentative ? ' <span class="pill tent">Tentative</span>' : '';
+  const missing = ev => [!ev.date && 'date', !ev.start && 'time', !ev.location && 'location'].filter(Boolean);
+  const isDraft = ev => !!ev.draft || missing(ev).length > 0;
+  const todoWhy = ev => ev.draft ? 'Still editing' : 'Needs ' + missing(ev).join(' + ');
+  const tent = ev => (ev.tentative ? ' <span class="pill tent">Tentative</span>' : '') + (isDraft(ev) ? ` <span class="pill red">${esc(todoWhy(ev))}</span>` : '');
 
   function coverage(ev, people, me, past) {
     const leads = people.filter(p => p.role === 'lead'), pals = people.filter(p => p.role !== 'lead');
@@ -405,7 +413,7 @@ try {
   function rowHTML(ev, people, me) {
     const past = ev.date < today();
     const meta = [range(ev.start, ev.end), ev.palStart ? 'PAL time ' + range(ev.palStart, ev.palEnd) : '', ev.location].filter(Boolean).join(' · ');
-    return `<button class="row c-${esc(ev.committee)}${past ? ' past' : ''}" data-action="open" data-id="${esc(ev.id)}">
+    return `<button class="row c-${esc(ev.committee)}${past ? ' past' : ''}${isDraft(ev) ? ' todo' : ''}" data-action="open" data-id="${esc(ev.id)}">
       ${tile(ev)}
       <span><span class="row-title">${esc(ev.title)}${chip(ev.committee)}${tent(ev)}</span><span class="row-meta">${esc(meta)}</span></span>
       ${coverage(ev, people, me, past)}</button>`;
@@ -429,7 +437,7 @@ try {
     const canW = state.canWrite !== false && !!state.db;
     const leadCap = capOf(ev, 'lead'), palCap = capOf(ev, 'pal');
     const facts = [
-      ['Event', `${d.w}, ${d.m} ${d.d} · ${range(ev.start, ev.end)}`],
+      ['Event', ev.date ? `${d.w}, ${d.m} ${d.d}${ev.start ? ' · ' + range(ev.start, ev.end) : ''}` : 'Date to be set' + (ev.start ? ' · ' + range(ev.start, ev.end) : '')],
       ev.palStart ? ['PAL time', range(ev.palStart, ev.palEnd)] : null,
       ev.location ? ['Location', ev.location] : null,
       ev.attire ? ['Attire', ev.attire] : null,
@@ -478,9 +486,10 @@ try {
         signup = `<div class="signup"><div class="btns">${btn('pal', true)}${btn('lead', false)}</div></div>`;
       }
     }
-    return `<article class="card c-${esc(ev.committee)}${past ? ' past' : ''}" id="ev-${esc(ev.id)}">
+    const flagBtn = canW ? `<div class="btns" style="margin-top:10px"><button class="btn quiet" data-action="flag" data-id="${esc(ev.id)}">${ev.draft ? 'Mark as done editing' : 'Flag as unfinished'}</button></div>` : '';
+    return `<article class="card c-${esc(ev.committee)}${past ? ' past' : ''}${isDraft(ev) ? ' todo' : ''}" id="ev-${esc(ev.id)}">
       <div class="card-head">${tile(ev)}<h3>${esc(ev.title)}${tent(ev)}</h3></div>
-      <dl class="facts">${facts}</dl>${roster}${signup}
+      <dl class="facts">${facts}</dl>${roster}${signup}${flagBtn}
       <div class="card-foot"><button class="link" data-action="edit" data-id="${esc(ev.id)}"${canW ? '' : ' disabled'}>Edit event</button></div>
     </article>`;
   }
@@ -491,13 +500,13 @@ try {
     const lead = new Date(y, m, 1).getDay(), dim = new Date(y, m + 1, 0).getDate();
     const weeks = Math.ceil((lead + dim) / 7);
     const byDate = {};
-    list.forEach(e => (byDate[e.date] = byDate[e.date] || []).push(e));
+    list.forEach(e => { if (e.date) (byDate[e.date] = byDate[e.date] || []).push(e); });
     let cells = DAYS.map(d => `<div class="cal-dow" role="columnheader">${d}</div>`).join('');
     for (let i = 0; i < weeks * 7; i++) {
       const d = new Date(y, m, 1 - lead + i), iso = isoOf(d), out = d.getMonth() !== m, evs = byDate[iso] || [];
       const chips = evs.map(e => {
-        const past = e.date < t, st = parseT(e.start);
-        return `<button class="cal-ev c-${esc(e.committee)}${past ? ' past' : ''}" data-action="open" data-cal="1" data-id="${esc(e.id)}" title="${esc(e.title + ' · ' + range(e.start, e.end))}" aria-label="${esc(e.title + ', ' + range(e.start, e.end))}"><span class="txt">${st ? t12(st, true) + ' ' : ''}${esc(e.title)}</span></button>`;
+        const past = (e.date && e.date < t), st = parseT(e.start);
+        return `<button class="cal-ev c-${esc(e.committee)}${past ? ' past' : ''}${isDraft(e) ? ' todo' : ''}" data-action="open" data-cal="1" data-id="${esc(e.id)}" title="${esc(e.title + ' · ' + range(e.start, e.end))}" aria-label="${esc(e.title + ', ' + range(e.start, e.end))}"><span class="txt">${st ? t12(st, true) + ' ' : ''}${esc(e.title)}</span></button>`;
       }).join('');
       cells += `<div class="cal-cell${out ? ' out' : ''}${iso === t ? ' today' : ''}${iso === view.calSel ? ' sel' : ''}" role="gridcell" data-date="${iso}">
         <button class="cal-num" data-action="cal-day" data-date="${iso}" aria-label="${esc(longDate(iso))}${evs.length ? ', ' + evs.length + ' event' + (evs.length === 1 ? '' : 's') : ''}">${d.getDate()}</button>
@@ -536,7 +545,7 @@ try {
     const { list, by } = compute();
     const me = meSlug();
     const t = today();
-    const up = list.filter(e => e.date >= t);
+    const up = list.filter(e => (!e.date || e.date >= t));
 
     $('#term').textContent = termLabel();
     const admin = isAdmin();
@@ -560,16 +569,19 @@ try {
 
     const isCal = view.tab === 'calendar';
     const scoped = view.tab === 'all' || isCal ? list : list.filter(e => e.committee === view.tab);
-    const pastCount = scoped.filter(e => e.date < t).length;
+    const pastCount = scoped.filter(e => (e.date && e.date < t)).length;
+    const todoCount = scoped.filter(isDraft).length;
     const canW = state.canWrite !== false && !!state.db;
     $('#toolbar').innerHTML = isCal
       ? `<span class="sp"></span><button class="btn primary" data-action="add"${canW ? '' : ' disabled'}>Add event</button>`
       : `<label class="check"><input type="checkbox" id="t-past" data-toggle="past"${view.showPast ? ' checked' : ''}> Show past events${pastCount ? ' (' + pastCount + ')' : ''}</label>
+      <label class="check"><input type="checkbox" data-toggle="todo"${view.todo ? ' checked' : ''}> <span style="color:var(--red);font-weight:700">Only unfinished${todoCount ? ' (' + todoCount + ')' : ''}</span></label>
       <label class="check"><input type="checkbox" id="t-mine" data-toggle="mine"${view.mine ? ' checked' : ''}${me ? '' : ' disabled'}> Only events I'm on</label>
       <span class="sp"></span>
       <button class="btn primary" data-action="add"${canW ? '' : ' disabled'}>Add event</button>`;
 
-    let items = scoped.filter(e => view.showPast || e.date >= t);
+    let items = scoped.filter(e => view.showPast || (!e.date || e.date >= t));
+    if (view.todo) items = items.filter(isDraft);
     if (view.mine && me) items = items.filter(e => isIn(by[e.id], me));
 
     let html = '';
@@ -588,7 +600,7 @@ try {
       let cur = '';
       html = '<div class="list">';
       for (const ev of items) {
-        const d = dparts(ev.date), key = d.ml + ' ' + d.y;
+        const d = dparts(ev.date), key = ev.date ? d.ml + ' ' + d.y : 'Date to be set';
         if (key !== cur) { cur = key; html += `</div><h2 class="month">${esc(key)}</h2><div class="list">`; }
         html += rowHTML(ev, by[ev.id] || [], me);
       }
@@ -683,7 +695,7 @@ try {
     if (!flow) return;
     const ev = state.events[flow.eventId]; if (!ev) { closeFlow(); return; }
     const name = currentName(), rec = myRec(flow.eventId);
-    const facts = `<dl class="facts"><dt>Name</dt><dd>${esc(name)}</dd><dt>Event</dt><dd>${esc(ev.title)}</dd><dt>When</dt><dd>${esc(longDate(ev.date))} · ${esc(range(ev.start, ev.end))}</dd>${ev.palStart ? `<dt>PAL time</dt><dd>${esc(range(ev.palStart, ev.palEnd))}</dd>` : ''}${ev.location ? `<dt>Location</dt><dd>${esc(ev.location)}</dd>` : ''}</dl>`;
+    const facts = `<dl class="facts"><dt>Name</dt><dd>${esc(name)}</dd><dt>Event</dt><dd>${esc(ev.title)}</dd><dt>When</dt><dd>${esc(ev.date ? longDate(ev.date) : 'Date to be set')}${ev.start ? ' · ' + esc(range(ev.start, ev.end)) : ''}</dd>${ev.palStart ? `<dt>PAL time</dt><dd>${esc(range(ev.palStart, ev.palEnd))}</dd>` : ''}${ev.location ? `<dt>Location</dt><dd>${esc(ev.location)}</dd>` : ''}</dl>`;
     const roleName = flow.role === 'lead' ? 'Lead PAL' : 'PAL';
     if (flow.step === 'confirm') {
       $('#s-title').textContent = 'Confirm your sign-up';
@@ -734,6 +746,11 @@ try {
       closeFlow(); toast('Availability saved.');
     } catch (e) { flow.busy = false; renderFlow(); writeFail(e); }
   }
+  async function toggleFlag(id) {
+    const ev = state.events[id]; if (!ev || !state.db) return;
+    const { _id, id: _i, ...rest } = ev;
+    try { await state.db.collection('events').doc(id).set({ ...rest, draft: !ev.draft }); toast(ev.draft ? 'Marked done.' : 'Flagged in red.'); } catch (e) { writeFail(e); }
+  }
   async function removeSignup(sid) {
     if (!state.db) return;
     try { await state.db.collection('signups').doc(sid).delete(); toast('Removed.'); } catch (e) { writeFail(e); }
@@ -758,6 +775,7 @@ try {
     F('f-attire').value = ev ? ev.attire || '' : DEFAULT_ATTIRE;
     F('f-notes').value = ev ? ev.notes || '' : '';
     F('f-tent').checked = ev ? !!ev.tentative : false;
+    F('f-draft').checked = ev ? !!ev.draft : false;
     const del = F('f-delete'); del.hidden = !ev; del.textContent = 'Delete event'; del.dataset.armed = '';
     $('#modal').hidden = false;
     F('f-title').focus();
@@ -773,9 +791,9 @@ try {
       start: F('f-start').value, end: F('f-end').value, palStart: F('f-pstart').value, palEnd: F('f-pend').value,
       maxLeads: capVal(F('f-maxleads').value), maxPals: capVal(F('f-maxpals').value),
       location: F('f-location').value.trim(), attire: F('f-attire').value.trim(), notes: F('f-notes').value.trim(),
-      tentative: F('f-tent').checked
+      tentative: F('f-tent').checked, draft: F('f-draft').checked
     };
-    if (!data.title || !data.date || !data.start) return;
+    if (!data.title) return;
     const btn = F('f-save'); btn.disabled = true;
     try {
       if (editingId) await state.db.collection('events').doc(editingId).set(data);
@@ -881,13 +899,13 @@ try {
     if (cur) lines.push(cur);
     return lines.length ? lines : [''];
   }
-  const PAL = { green: '#006747', evergreen: '#005432', gold: '#CFC493', sand: '#EDEBD1', storm: '#006484', silver: '#CAD2D8', slate: '#466069', ink: '#303434', lemon: '#DBE442', white: '#FFFFFF' };
+  const PAL = { green: '#006747', evergreen: '#005432', gold: '#CFC493', sand: '#EDEBD1', storm: '#006484', silver: '#CAD2D8', slate: '#466069', ink: '#303434', lemon: '#DBE442', white: '#FFFFFF', red: '#C8102E' };
   const COM_COLOR = { htc: PAL.storm, cohort: PAL.green, meetgo: PAL.gold };
   const COM_INK = { htc: PAL.white, cohort: PAL.white, meetgo: PAL.ink };
 
   function makeReportPDF(scope, com) {
     const { list, by } = compute(), t = today();
-    const evs = list.filter(e => (com === 'all' || e.committee === com) && (scope === 'all' || e.date >= t));
+    const evs = list.filter(e => (com === 'all' || e.committee === com) && (scope === 'all' || (!e.date || e.date >= t)));
     const W = 612, H = 792, M = 40, CW = 532, BOTTOM = H - 52;
     const pages = []; let cur = null, y = 0;
     const rect = (x, top, w, h, fill) => cur.push(`${rgbOf(fill)} rg ${x.toFixed(2)} ${(H - top - h).toFixed(2)} ${w.toFixed(2)} ${h.toFixed(2)} re f`);
@@ -929,7 +947,7 @@ try {
       [String(evs.length), 'EVENTS'],
       [String(allP.filter(p => p.role === 'lead').length), 'LEAD PAL SIGN-UPS'],
       [String(allP.filter(p => p.role !== 'lead').length), 'PAL SIGN-UPS'],
-      [String(evs.filter(e => e.date >= t && !(by[e.id] || []).some(p => p.role === 'lead')).length), 'UPCOMING NEED A LEAD']
+      [String(evs.filter(e => (!e.date || e.date >= t) && !(by[e.id] || []).some(p => p.role === 'lead')).length), 'UPCOMING NEED A LEAD']
     ];
     const tileW = (CW - 30) / 4;
     stats.forEach((s, i) => {
@@ -954,9 +972,10 @@ try {
     let lastMonth = '';
     for (const ev of evs) {
       const people = by[ev.id] || [], leads = people.filter(p => p.role === 'lead'), pals = people.filter(p => p.role !== 'lead');
-      const past = ev.date < t, d = dparts(ev.date), monthKey = d.ml + ' ' + d.y;
+      const past = (ev.date && ev.date < t), d = dparts(ev.date), monthKey = ev.date ? d.ml + ' ' + d.y : 'Date to be set';
       const pillTxt = (COMMITTEES[ev.committee] || ev.committee), pillW = tw(pillTxt, 7.5, 'b') + 14;
-      const titleLines = wrapText(ev.title, cWid - pillW - 10, 13, 'b');
+      const redW = isDraft(ev) ? tw(todoWhy(ev).toUpperCase(), 7.5, 'b') + 18 : 0;
+      const titleLines = wrapText(ev.title, cWid - pillW - redW - 10, 13, 'b');
       const meta = [ev.tentative ? 'TENTATIVE' : '', range(ev.start, ev.end), ev.palStart ? 'PAL time ' + range(ev.palStart, ev.palEnd) : '', ev.location].filter(Boolean).join('  ·  ');
       const metaLines = wrapText(meta, cWid, 9, 'f');
       const noteLines = ev.notes ? wrapText('Note: ' + ev.notes, cWid, 8.5, 'i') : [];
@@ -973,14 +992,18 @@ try {
       frame(M, y, CW, h, PAL.silver, 0.75);
       rect(M, y, 54, h, COM_COLOR[ev.committee] || PAL.slate);
       const ink = COM_INK[ev.committee] || PAL.white, mid = y + h / 2;
-      text(d.m.toUpperCase(), M + 27, mid - 14, 8.5, 'b', ink, 'c');
-      text(String(d.d), M + 27, mid + 9, 24, 'b', ink, 'c');
-      text(d.w.toUpperCase(), M + 27, mid + 22, 8.5, 'b', ink, 'c');
+      if (ev.date) {
+        text(d.m.toUpperCase(), M + 27, mid - 14, 8.5, 'b', ink, 'c');
+        text(String(d.d), M + 27, mid + 9, 24, 'b', ink, 'c');
+        text(d.w.toUpperCase(), M + 27, mid + 22, 8.5, 'b', ink, 'c');
+      } else text('TBD', M + 27, mid + 6, 18, 'b', ink, 'c');
+      if (isDraft(ev)) rect(M - 4, y, 4, h, PAL.red);
       let cy = y + 10;
       titleLines.forEach((ln, i) => { text(ln, x0, cy + 11 + i * 16, 13, 'b', PAL.ink); });
       const px = M + CW - 10 - pillW;
       rect(px, cy, pillW, 13, COM_COLOR[ev.committee] || PAL.slate);
       text(pillTxt, px + pillW / 2, cy + 9.5, 7.5, 'b', ink, 'c');
+      if (isDraft(ev)) { const rt = todoWhy(ev).toUpperCase(), rw = tw(rt, 7.5, 'b') + 12; rect(px - rw - 6, cy, rw, 13, PAL.red); text(rt, px - rw - 6 + rw / 2, cy + 9.5, 7.5, 'b', PAL.white, 'c'); }
       cy += titleLines.length * 16 + 2;
       metaLines.forEach((ln, i) => text(ln, x0, cy + 9 + i * 12, 9, 'f', PAL.slate));
       cy += metaLines.length * 12;
@@ -1069,7 +1092,8 @@ try {
     if (!e.target.closest('.menu-wrap')) closeMenu();
     const dt = e.target.closest('[data-toggle]');
     if (dt) {
-      if (dt.dataset.toggle === 'past') { view.showPast = dt.checked; store.set('pal-past', dt.checked ? '1' : '0'); }
+      if (dt.dataset.toggle === 'todo') { view.todo = dt.checked; }
+      else if (dt.dataset.toggle === 'past') { view.showPast = dt.checked; store.set('pal-past', dt.checked ? '1' : '0'); }
       else view.mine = dt.checked;
       render(); return;
     }
@@ -1091,6 +1115,7 @@ try {
         if (armed === sid) { clearTimeout(armedTimer); armed = null; removeSignup(sid); }
         else { armed = sid; clearTimeout(armedTimer); armedTimer = setTimeout(() => { armed = null; schedule(); }, 3500); schedule(); }
       }
+      else if (a === 'flag') toggleFlag(el.dataset.id);
       else if (a === 'add') openForm(null, el.dataset.date);
       else if (a === 'edit') openForm(el.dataset.id);
       else if (a === 'close') closeForm();
