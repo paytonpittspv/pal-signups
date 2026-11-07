@@ -1,0 +1,1078 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>PAL Event Sign-Ups</title>
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+<link rel="icon" type="image/png" sizes="192x192" href="favicon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Barlow+Condensed:wght@600;700&display=swap">
+<style>
+/* USF palette: Storm blue #HowToCollege, USF Green Cohort Events, USF Gold Meet & Go's. */
+:root{
+  --bg:#ffffff; --surface:#f7f6ea; --line:#e0ddc0; --fg:#303434; --muted:#466069;
+  --storm:#006484; --storm-t:#006484; --green:#006747; --green-t:#005432; --gold:#cfc493; --gold-t:#6e6320;
+  --accent:#006747; --accent-h:#005432; --accent-t:#005432; --on:#ffffff;
+  --warn-bg:#f1f4b4; --warn-fg:#3d4a00; --focus:#006484; --scrim:rgba(48,52,52,.6);
+  color-scheme:light;
+  --display:'Barlow Condensed','Arial Narrow',Arial,sans-serif;
+  --body:'Barlow',system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-serif;
+}
+[hidden]{display:none!important}
+html{-webkit-text-size-adjust:100%}
+*{box-sizing:border-box}
+body{margin:0}
+h1,h2,h3,h4,p,dl,dd,ul{margin-top:0}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:15px;line-height:1.45;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 48px}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:30;background:var(--bg)}
+.c-htc{--c:var(--storm);--ct:var(--storm-t)}
+.c-cohort{--c:var(--green);--ct:var(--green-t)}
+.c-meetgo{--c:var(--gold);--ct:var(--gold-t);--c-on:#303434}
+.wrap{max-width:1040px;margin:0 auto}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+.stripe{display:flex;height:4px;margin:0 calc(-1 * max(16px,env(safe-area-inset-left,0px)))}
+.stripe i{flex:1;background:var(--c)}
+.top-in{display:grid;grid-template-columns:1fr auto;grid-template-areas:"title menu" "sub who";align-items:end;gap:8px 24px;padding:22px 0 14px}
+.t-title{grid-area:title;align-self:start}
+.menu-wrap{grid-area:menu;position:relative;align-self:start;justify-self:end}
+.t-sub{grid-area:sub}
+.who{grid-area:who;display:flex;flex-direction:column;gap:4px;width:min(280px,100%)}
+h1{font:700 clamp(30px,6vw,44px)/1 var(--display);text-transform:uppercase;letter-spacing:.02em;margin:0;text-wrap:balance}
+.sub{margin:0;color:var(--muted);font-size:17px}
+.live{white-space:nowrap;font-size:14px}
+.live::before{content:"";display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--muted);margin-right:6px}
+.live.on::before{background:var(--accent-t)}
+.who>span{font:600 12px var(--display);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+input,select,textarea{background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:9px 11px;min-height:42px;font-size:16px;width:100%}
+input:focus,select:focus{border-color:var(--focus)}
+.combo{position:relative}
+.combo input{padding-right:44px}
+.combo-btn{position:absolute;right:1px;top:1px;height:40px;width:42px;border:0;background:none;color:var(--muted);border-radius:0 6px 6px 0;display:flex;align-items:center;justify-content:center}
+.combo-btn:hover{background:var(--surface)}
+.combo-list{position:absolute;left:0;right:0;top:100%;z-index:36;margin:3px 0 0;padding:4px;list-style:none;background:var(--bg);border:1px solid var(--line);border-radius:6px;max-height:260px;overflow-y:auto;box-shadow:0 8px 24px rgba(48,52,52,.18)}
+.combo-list li{padding:9px 10px;border-radius:4px;cursor:pointer}
+.combo-list li:hover,.combo-list li.act{background:var(--surface)}
+.combo-list li[aria-selected="true"]{font-weight:600;color:var(--accent-t)}
+.menu-btn{display:flex;align-items:center;gap:8px}
+.menu-panel{position:absolute;right:0;top:calc(100% + 6px);z-index:35;width:min(340px,calc(100vw - 32px));background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:16px;box-shadow:0 10px 30px rgba(48,52,52,.2)}
+.menu-panel h2{font:700 24px var(--display);text-transform:uppercase;letter-spacing:.04em;margin:0 0 10px}
+.menu-panel fieldset{border:0;padding:0;margin:0 0 12px}
+.menu-panel legend{font:600 12px var(--display);letter-spacing:.12em;text-transform:uppercase;color:var(--muted);padding:0;margin-bottom:4px}
+.radio{display:flex;align-items:center;gap:10px;padding:5px 0;cursor:pointer}
+.radio input{width:18px;height:18px;min-height:0;accent-color:var(--accent);flex:none}
+.hint{color:var(--muted);font-size:13px;margin:0 0 12px}
+.menu-panel .btn{width:100%}
+.tabs-bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--bg);border-bottom:1px solid var(--line);margin:0 calc(-1 * max(16px,env(safe-area-inset-left,0px)));padding:0 max(16px,env(safe-area-inset-left,0px))}
+.tabs{display:flex;gap:4px;overflow-x:auto;max-width:1040px;margin:0 auto;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tab{background:none;border:0;border-bottom:4px solid transparent;padding:12px 12px 9px;font:600 17px var(--display);letter-spacing:.06em;text-transform:uppercase;color:var(--muted);white-space:nowrap;display:flex;align-items:center;gap:8px}
+.tab .dot{width:10px;height:10px;border-radius:50%;background:var(--c)}
+.tab .n{font:600 12px var(--body);letter-spacing:0;background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:0 7px;color:var(--muted)}
+.tab[aria-current="page"]{color:var(--fg);border-bottom-color:var(--c,var(--fg))}
+.tab[aria-current="page"][data-tab="all"],.tab[aria-current="page"][data-tab="calendar"]{border-bottom-color:var(--fg)}
+.toolbar{display:flex;flex-wrap:wrap;align-items:center;gap:10px 22px;padding:16px 0 8px}
+.toolbar .sp{flex:1}
+.check{display:flex;align-items:center;gap:8px;cursor:pointer;user-select:none}
+.check input{width:18px;height:18px;min-height:0;accent-color:var(--accent)}
+.btn{background:var(--bg);border:1px solid var(--fg);border-radius:6px;padding:8px 14px;min-height:42px;font-weight:600}
+.btn:hover{background:var(--surface)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn.primary:hover{background:var(--accent-h);border-color:var(--accent-h)}
+.btn.quiet{border-color:var(--line);color:var(--muted);font-weight:500}
+.btn.danger{border-color:var(--fg);color:var(--fg)}
+.btn[disabled]{opacity:.5;cursor:not-allowed}
+.banner{border:1px solid var(--line);background:var(--surface);border-radius:6px;padding:10px 14px;margin:12px 0}
+.banner.warn{background:var(--warn-bg);color:var(--warn-fg);border-color:transparent}
+.month{font:700 20px var(--display);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:22px 0 8px}
+.list{display:flex;flex-direction:column;gap:8px}
+.tile{display:flex;flex-direction:column;align-items:center;justify-content:center;width:56px;min-height:64px;padding:4px 0;background:var(--c);color:var(--c-on,var(--on));border-radius:4px;font-family:var(--display);text-transform:uppercase;line-height:1;flex:none}
+.tile .m{font-size:12px;letter-spacing:.14em;font-weight:600}
+.tile .d{font-size:28px;font-weight:700;margin:2px 0}
+.tile .w{font-size:12px;letter-spacing:.1em;font-weight:600}
+.row{display:grid;grid-template-columns:auto 1fr auto;gap:14px;align-items:center;text-align:left;width:100%;background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:10px 14px 10px 10px}
+.row:hover{border-color:var(--ct);background:var(--surface)}
+.row.past,.card.past{opacity:.62}
+.row-title{display:block;font:700 22px/1.15 var(--display);letter-spacing:.02em}
+.row-meta{display:block;color:var(--muted);margin-top:2px}
+.row-cov{display:flex;flex-direction:column;align-items:flex-end;gap:4px;text-align:right;max-width:260px}
+.cov-sub{color:var(--muted);font-size:13px}
+.chip{display:inline-block;vertical-align:middle;font:600 12px var(--body);letter-spacing:.04em;color:var(--ct);background:color-mix(in srgb,var(--c) 12%,var(--bg));border:1px solid color-mix(in srgb,var(--c) 35%,var(--bg));border-radius:999px;padding:1px 9px;margin-left:6px;position:relative;top:-2px}
+.pill{display:inline-block;font:600 12px var(--body);border-radius:999px;padding:1px 9px;white-space:nowrap}
+.pill.warn{background:var(--warn-bg);color:var(--warn-fg)}
+.pill.me{background:var(--fg);color:var(--bg)}
+.pill.tent{background:var(--surface);color:var(--muted);border:1px dashed var(--muted)}
+.pill.full{background:var(--surface);color:var(--muted);border:1px solid var(--line)}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,440px),1fr));gap:14px;margin-top:12px}
+.card{background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:14px;display:flex;flex-direction:column;gap:12px;min-width:0;scroll-margin-top:72px}
+.card.flash{animation:flash 1.6s ease-out}
+@keyframes flash{from{border-color:var(--c);box-shadow:0 0 0 3px color-mix(in srgb,var(--c) 40%,transparent)}to{box-shadow:0 0 0 0 transparent}}
+.card-head{display:flex;gap:12px;align-items:flex-start}
+.card-head h3{font:700 24px/1.1 var(--display);letter-spacing:.02em;margin:0;flex:1;min-width:0;overflow-wrap:anywhere}
+.facts{display:grid;grid-template-columns:auto 1fr;gap:4px 14px;margin:0}
+.facts dt{font:600 12px var(--display);letter-spacing:.12em;text-transform:uppercase;color:var(--muted);padding-top:3px}
+.facts dd{margin:0;min-width:0;overflow-wrap:anywhere}
+.roster h4{font:600 12px var(--display);letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin:0 0 6px;display:flex;align-items:center;gap:8px}
+.chips{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:6px}
+.who-chip{display:inline-flex;align-items:center;gap:6px;background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:3px 4px 3px 11px}
+.who-chip.lead{background:color-mix(in srgb,var(--c) 14%,var(--bg));border-color:color-mix(in srgb,var(--c) 40%,var(--bg))}
+.who-chip.me{border-color:var(--fg)}
+.who-note{color:var(--muted);font-size:13px}
+.x{border:0;background:none;color:var(--muted);border-radius:999px;min-width:26px;height:26px;padding:0 6px;font-size:15px;line-height:1}
+.x:hover{background:var(--line);color:var(--fg)}
+.x.armed{background:var(--accent);color:#fff;font-size:12px;font-weight:600}
+.empty-roster{color:var(--muted);font-size:14px;margin:0}
+.signup{border-top:1px solid var(--line);padding-top:12px;display:flex;flex-direction:column;gap:10px}
+.mine{margin:0}
+.btns{display:flex;flex-wrap:wrap;gap:8px}
+.card-foot{display:flex;justify-content:flex-end}
+.link{background:none;border:0;color:var(--muted);text-decoration:underline;padding:4px 0;font-size:14px}
+.empty{border:1px dashed var(--line);border-radius:6px;padding:28px 18px;text-align:center;color:var(--muted);margin-top:14px}
+.empty b{display:block;font:700 22px var(--display);letter-spacing:.04em;text-transform:uppercase;color:var(--fg);margin-bottom:4px}
+.modal{position:fixed;inset:0;z-index:40;background:var(--scrim);display:flex;align-items:flex-start;justify-content:center;overflow-y:auto;padding:max(16px,env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-left,0px)) 24px}
+.panel{background:var(--bg);border:1px solid var(--line);border-radius:8px;width:100%;max-width:560px;padding:18px;margin-top:4vh}
+.panel h2{font:700 28px var(--display);text-transform:uppercase;letter-spacing:.03em;margin:0 0 12px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.grid2 .full{grid-column:1/-1}
+.field span,.fieldlbl{display:block;font-size:13px;color:var(--muted);margin-bottom:3px}
+.panel .btns{margin-top:16px;justify-content:space-between}
+.panel .facts{margin:6px 0 4px}
+.note-box{background:var(--surface);border-radius:6px;padding:10px 12px;margin:10px 0 0}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(20px + env(safe-area-inset-bottom,0px));background:var(--fg);color:var(--bg);padding:10px 16px;border-radius:6px;max-width:min(92vw,520px);z-index:50;font-weight:500}
+/* calendar */
+.cal-head{display:flex;align-items:center;gap:10px;margin:8px 0 10px;flex-wrap:wrap}
+.cal-head h2{font:700 30px var(--display);text-transform:uppercase;letter-spacing:.04em;margin:0;min-width:200px;text-align:center;flex:1}
+.cal-nav{width:44px;padding:8px 0;font-size:20px;line-height:1}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;margin:0 0 10px;color:var(--muted);font-size:13px}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--c);margin-right:6px}
+.cal-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));border-top:1px solid var(--line);border-left:1px solid var(--line)}
+.cal-dow{padding:6px 4px;font:600 13px var(--display);letter-spacing:.12em;text-transform:uppercase;color:var(--muted);text-align:center;border-right:1px solid var(--line);border-bottom:1px solid var(--line);background:var(--surface)}
+.cal-cell{min-height:104px;padding:4px;border-right:1px solid var(--line);border-bottom:1px solid var(--line);min-width:0;cursor:pointer}
+.cal-cell.out{background:var(--surface)}
+.cal-cell.out .cal-num{color:#8a9a9f}
+.cal-cell.sel{outline:2px solid var(--fg);outline-offset:-2px}
+.cal-num{background:none;border:0;font:600 14px var(--body);width:28px;height:28px;border-radius:999px;padding:0;color:var(--fg)}
+.cal-cell.today .cal-num{background:var(--accent);color:#fff}
+.cal-evs{display:flex;flex-direction:column;gap:3px;margin-top:2px}
+.cal-ev{display:block;width:100%;text-align:left;background:var(--c);color:var(--c-on,#fff);border:0;border-radius:3px;padding:2px 6px;font-size:12px;line-height:1.25;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-height:0}
+.cal-ev:hover{filter:brightness(.92)}
+.cal-ev.past{opacity:.6}
+.cal-day{margin-top:18px}
+.cal-day h3{font:700 22px var(--display);text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin:0 0 8px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+@media (max-width:640px){
+  .cal-cell{min-height:56px;padding:2px}
+  .cal-num{width:24px;height:24px;font-size:13px}
+  .cal-evs{flex-direction:row;flex-wrap:wrap;gap:3px;padding:2px}
+  .cal-ev{width:9px;height:9px;border-radius:50%;padding:0}
+  .cal-ev .txt{display:none}
+  .cal-dow{font-size:11px;letter-spacing:.04em;padding:5px 0}
+  .cal-head h2{font-size:21px;min-width:0;white-space:nowrap}
+}
+@media (max-width:560px){
+  .top-in{grid-template-columns:1fr auto;grid-template-areas:"title menu" "sub sub" "who who"}
+  .who{width:100%}
+  .row{grid-template-columns:auto 1fr}
+  .row-cov{grid-column:2;align-items:flex-start;text-align:left;max-width:none}
+  .grid2{grid-template-columns:1fr}
+  .tile{width:50px}
+}
+@media (prefers-reduced-motion:reduce){.card.flash{animation:none}}
+</style>
+</head><body>
+<div class="wrap">
+  <header>
+    <div class="stripe" aria-hidden="true"><i class="c-htc"></i><i class="c-cohort"></i><i class="c-meetgo"></i></div>
+    <div class="top-in">
+      <div class="t-title"><h1>PAL Event Sign-Ups</h1></div>
+      <div class="menu-wrap">
+        <button class="btn menu-btn" id="menu-btn" type="button" data-action="menu-toggle" aria-haspopup="true" aria-expanded="false" aria-controls="menu-panel">
+          <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><path d="M2 4.5h14M2 9h14M2 13.5h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><span>Menu</span>
+        </button>
+        <div class="menu-panel" id="menu-panel" hidden>
+          <h2>Export schedule</h2>
+          <fieldset><legend>Which events</legend>
+            <label class="radio"><input type="radio" name="x-scope" value="current" checked> Current events only (today and later)</label>
+            <label class="radio"><input type="radio" name="x-scope" value="all"> All events, including past</label>
+          </fieldset>
+          <fieldset><legend>Which committee</legend>
+            <label class="radio"><input type="radio" name="x-com" value="all" checked> All committees</label>
+            <label class="radio"><input type="radio" name="x-com" value="htc"> #HowToCollege</label>
+            <label class="radio"><input type="radio" name="x-com" value="cohort"> Cohort Events</label>
+            <label class="radio"><input type="radio" name="x-com" value="meetgo"> Meet &amp; Go's</label>
+          </fieldset>
+          <p class="hint">Downloads a PDF report with each event and who is signed up.</p>
+          <button class="btn primary" type="button" id="x-go" data-action="export">Download PDF report</button>
+        </div>
+      </div>
+      <p class="sub t-sub"><span id="term">Fall 2026 - Spring 2027</span> · <span id="live" class="live">Connecting</span></p>
+      <div class="who">
+        <span id="who-lbl">Signing up as (first name)</span>
+        <div class="combo">
+          <input id="who" role="combobox" aria-labelledby="who-lbl" aria-autocomplete="list" aria-expanded="false" aria-controls="who-list" placeholder="First name" autocomplete="off" autocapitalize="words" maxlength="30">
+          <button class="combo-btn" id="who-btn" type="button" data-action="combo-toggle" aria-label="Show all names" tabindex="-1">
+            <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><path d="M2 5l5 5 5-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+          <ul class="combo-list" id="who-list" role="listbox" aria-labelledby="who-lbl" hidden></ul>
+        </div>
+      </div>
+    </div>
+  </header>
+</div>
+<div class="tabs-bar"><nav class="tabs" aria-label="Sections">
+  <button class="tab" data-action="tab" data-tab="all">All events <span class="n" data-n="all"></span></button>
+  <button class="tab" data-action="tab" data-tab="calendar">Calendar</button>
+  <button class="tab c-htc" data-action="tab" data-tab="htc"><i class="dot"></i>#HowToCollege <span class="n" data-n="htc"></span></button>
+  <button class="tab c-cohort" data-action="tab" data-tab="cohort"><i class="dot"></i>Cohort Events <span class="n" data-n="cohort"></span></button>
+  <button class="tab c-meetgo" data-action="tab" data-tab="meetgo"><i class="dot"></i>Meet &amp; Go's <span class="n" data-n="meetgo"></span></button>
+</nav></div>
+<div class="wrap">
+  <div id="banners"></div>
+  <div class="toolbar" id="toolbar"></div>
+  <main id="view" aria-live="polite"></main>
+</div>
+
+<div class="modal" id="modal" hidden>
+  <div class="panel" role="dialog" aria-modal="true" aria-labelledby="m-title">
+    <h2 id="m-title">Add event</h2>
+    <form id="evform" autocomplete="off">
+      <div class="grid2">
+        <label class="field full"><span>Event name</span><input id="f-title" required maxlength="80"></label>
+        <label class="field full"><span>Committee</span>
+          <select id="f-committee"><option value="htc">#HowToCollege</option><option value="cohort">Cohort Events</option><option value="meetgo">Meet &amp; Go's</option></select></label>
+        <label class="field full"><span>Date</span><input id="f-date" type="date" required></label>
+        <label class="field"><span>Event starts</span><input id="f-start" type="time" required></label>
+        <label class="field"><span>Event ends</span><input id="f-end" type="time"></label>
+        <label class="field"><span>PALs arrive</span><input id="f-pstart" type="time"></label>
+        <label class="field"><span>PALs leave</span><input id="f-pend" type="time"></label>
+        <label class="field"><span>Max Lead PALs</span><input id="f-maxleads" type="number" min="0" max="99" inputmode="numeric" placeholder="No limit"></label>
+        <label class="field"><span>Max PALs</span><input id="f-maxpals" type="number" min="0" max="99" inputmode="numeric" placeholder="No limit"></label>
+        <label class="field full"><span>Location</span><input id="f-location" maxlength="100"></label>
+        <label class="field full"><span>Attire</span><input id="f-attire" maxlength="100"></label>
+        <label class="field full"><span>Notes (optional)</span><input id="f-notes" maxlength="200"></label>
+        <label class="check full"><input type="checkbox" id="f-tent"> Tentative, details may change</label>
+      </div>
+      <div class="btns">
+        <span class="btns"><button class="btn primary" type="submit" id="f-save">Save event</button>
+        <button class="btn" type="button" data-action="close">Cancel</button></span>
+        <button class="btn danger" type="button" data-action="delete" id="f-delete" hidden>Delete event</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="modal" id="smodal" hidden>
+  <div class="panel" role="dialog" aria-modal="true" aria-labelledby="s-title">
+    <h2 id="s-title"></h2>
+    <div id="s-body"></div>
+  </div>
+</div>
+<div class="toast" id="toast" role="status" hidden></div>
+
+<script type="module">
+const diag = (window.__diag = []);
+window.addEventListener('error', e => { diag.push(String(e.message || e)); window.__render && window.__render(); });
+window.addEventListener('unhandledrejection', e => { diag.push(String((e.reason && e.reason.message) || e.reason)); window.__render && window.__render(); });
+let createClient = null, supabaseConfig = null, SEED = { events: {}, signups: {}, pals: {} };
+try { ({ createClient } = await import("https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/+esm")); }
+catch (e) { diag.push("Could not load the Supabase library: " + e.message); }
+try { ({ supabaseConfig } = await import("./config.js")); if (!supabaseConfig) diag.push("config.js is the wrong version (no supabaseConfig). Upload the newest folder."); }
+catch (e) { diag.push("Could not load config.js: " + e.message); }
+try { ({ SEED } = await import("./seed.js")); }
+catch (e) { /* seed.js is optional: only needed once, to load the starting schedule */ }
+
+const fb = { SEED, ok: false, sb: null };
+try {
+  if (createClient && supabaseConfig && /^https:\/\/.+\.supabase\.co/.test(String(supabaseConfig.url)) && supabaseConfig.anonKey && !String(supabaseConfig.anonKey).includes("PASTE")) {
+    fb.sb = createClient(supabaseConfig.url, supabaseConfig.anonKey);
+    fb.ok = true;
+  }
+} catch (e) { fb.ok = false; diag.push("Supabase setup failed: " + e.message); }
+
+(() => {
+  const COMMITTEES = { htc: '#HowToCollege', cohort: 'Cohort Events', meetgo: "Meet & Go's" };
+  const TABS = ['all', 'calendar', 'htc', 'cohort', 'meetgo'];
+  const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  const MONTHS_LONG = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+  const DEFAULT_ATTIRE = 'PAL shirt and name tag';
+
+  const $ = (s, r = document) => r.querySelector(s);
+  const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const pad = n => String(n).padStart(2, '0');
+  const store = {
+    get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } },
+    set(k, v) { try { localStorage.setItem(k, v); } catch (e) { /* storage can be blocked */ } }
+  };
+  const slug = s => String(s || '').toLowerCase().normalize('NFKD').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 60);
+  const isoOf = d => d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
+  const today = () => isoOf(new Date());
+  const isMobile = () => window.matchMedia && window.matchMedia('(max-width:640px)').matches;
+  const titleCase = s => s.replace(/\s+/g, ' ').trim().replace(/(^|[\s'-])(\p{L})/gu, (m, a, b) => a + b.toUpperCase());
+
+  /* Academic year rolls over on August 1: Aug 2026 - Jul 2027 shows "Fall 2026 - Spring 2027". */
+  function termLabel() {
+    const d = new Date(), y = d.getMonth() >= 7 ? d.getFullYear() : d.getFullYear() - 1;
+    return 'Fall ' + y + ' - Spring ' + (y + 1);
+  }
+
+  const state = { db: null, dbChecked: false, canWrite: null, events: {}, signups: {}, pals: {}, ready: { events: false, signups: false } };
+  const nowD = new Date();
+  const view = { tab: 'all', showPast: store.get('pal-past') === '1', mine: false, focusId: null, cal: { y: nowD.getFullYear(), m: nowD.getMonth() }, calSel: today() };
+  let armed = null, armedTimer = null, editingId = null, raf = false, toastTimer = null, flow = null;
+
+  const who = $('#who');
+  who.value = store.get('pal-name') || '';
+
+  /* ---------- formatting ---------- */
+  function parseT(t) { if (!t) return null; const p = t.split(':').map(Number); return { h: p[0], m: p[1] || 0 }; }
+  function t12(o, withPeriod) {
+    const p = o.h >= 12 ? 'PM' : 'AM'; let h = o.h % 12; if (h === 0) h = 12;
+    const s = o.m ? h + ':' + pad(o.m) : String(h);
+    return withPeriod ? s + ' ' + p : s;
+  }
+  function range(a, b) {
+    const A = parseT(a), B = parseT(b);
+    if (!A) return '';
+    if (!B) return t12(A, true);
+    const same = (A.h >= 12) === (B.h >= 12);
+    return (same ? t12(A, false) : t12(A, true)) + '–' + t12(B, true);
+  }
+  function dparts(iso) {
+    const p = String(iso || '').split('-').map(Number);
+    const d = new Date(p[0], (p[1] || 1) - 1, p[2] || 1);
+    return { w: DAYS[d.getDay()], m: MONTHS[d.getMonth()], ml: MONTHS_LONG[d.getMonth()], d: d.getDate(), y: d.getFullYear() };
+  }
+  const longDate = iso => { const d = dparts(iso); return d.w + ', ' + d.m + ' ' + d.d + ', ' + d.y; };
+  const evSort = (a, b) => (a.date || '').localeCompare(b.date || '') || (a.start || '').localeCompare(b.start || '') || (a.title || '').localeCompare(b.title || '');
+  const capOf = (ev, role) => { const n = Number(role === 'lead' ? ev.maxLeads : ev.maxPals); return n > 0 ? n : Infinity; };
+  const capTxt = (n, cap) => isFinite(cap) ? ' (' + n + '/' + cap + ')' : (n ? ' (' + n + ')' : '');
+
+  /* ---------- derived data ---------- */
+  function compute() {
+    const list = Object.entries(state.events).map(([id, e]) => ({ id, ...e })).sort(evSort);
+    const by = {};
+    for (const s of Object.values(state.signups)) (by[s.eventId] = by[s.eventId] || []).push(s);
+    for (const k in by) by[k].sort((a, b) => (a.role === b.role ? 0 : a.role === 'lead' ? -1 : 1) || (a.at || 0) - (b.at || 0));
+    return { list, by };
+  }
+  const meSlug = () => slug(who.value);
+  const isIn = (people, me) => !!me && (people || []).some(p => slug(p.name) === me);
+
+  /* ---------- html builders ---------- */
+  const tile = ev => { const d = dparts(ev.date); return `<span class="tile c-${esc(ev.committee)}"><span class="m">${d.m}</span><span class="d">${d.d}</span><span class="w">${d.w}</span></span>`; };
+  const chip = c => `<span class="chip c-${esc(c)}">${esc(COMMITTEES[c] || c)}</span>`;
+  const tent = ev => ev.tentative ? ' <span class="pill tent">Tentative</span>' : '';
+
+  function coverage(ev, people, me, past) {
+    const leads = people.filter(p => p.role === 'lead'), pals = people.filter(p => p.role !== 'lead');
+    const palCap = capOf(ev, 'pal');
+    let top;
+    if (leads.length) top = `<span><b>Lead</b> ${esc(leads.map(p => p.name).join(', '))}</span>`;
+    else if (!past) top = '<span class="pill warn">Needs a lead</span>';
+    else top = '<span class="cov-sub">No lead listed</span>';
+    const n = pals.length;
+    const sub = isFinite(palCap) ? `${n}/${palCap} PALs` : (n ? `${n} PAL${n === 1 ? '' : 's'}` : (past ? '' : 'No PALs yet'));
+    const full = !past && isFinite(palCap) && n >= palCap ? ' <span class="pill full">Full</span>' : '';
+    return `<span class="row-cov">${top}${sub ? `<span class="cov-sub">${sub}${full}</span>` : ''}${isIn(people, me) ? '<span class="pill me">You\'re in</span>' : ''}</span>`;
+  }
+
+  function rowHTML(ev, people, me) {
+    const past = ev.date < today();
+    const meta = [range(ev.start, ev.end), ev.palStart ? 'PAL time ' + range(ev.palStart, ev.palEnd) : '', ev.location].filter(Boolean).join(' · ');
+    return `<button class="row c-${esc(ev.committee)}${past ? ' past' : ''}" data-action="open" data-id="${esc(ev.id)}">
+      ${tile(ev)}
+      <span><span class="row-title">${esc(ev.title)}${chip(ev.committee)}${tent(ev)}</span><span class="row-meta">${esc(meta)}</span></span>
+      ${coverage(ev, people, me, past)}</button>`;
+  }
+
+  function chipsHTML(list, me, canEditRoster) {
+    return list.map(p => {
+      const mine = me && slug(p.name) === me;
+      const isArmed = armed === p._id;
+      const x = canEditRoster ? `<button class="x${isArmed ? ' armed' : ''}" data-action="rm" data-sid="${esc(p._id)}" aria-label="Remove ${esc(p.name)}">${isArmed ? 'Remove?' : '×'}</button>` : '';
+      return `<li class="who-chip ${p.role === 'lead' ? 'lead' : ''} ${mine ? 'me' : ''}"><span>${esc(p.name)}</span>${p.note ? `<span class="who-note">${esc(p.note)}</span>` : ''}${x}</li>`;
+    }).join('');
+  }
+
+  function cardHTML(ev, people, me) {
+    const past = ev.date < today();
+    const d = dparts(ev.date);
+    const leads = people.filter(p => p.role === 'lead'), pals = people.filter(p => p.role !== 'lead');
+    const mineRec = me ? people.find(p => slug(p.name) === me) : null;
+    const canW = state.canWrite !== false && !!state.db;
+    const leadCap = capOf(ev, 'lead'), palCap = capOf(ev, 'pal');
+    const facts = [
+      ['Event', `${d.w}, ${d.m} ${d.d} · ${range(ev.start, ev.end)}`],
+      ev.palStart ? ['PAL time', range(ev.palStart, ev.palEnd)] : null,
+      ev.location ? ['Location', ev.location] : null,
+      ev.attire ? ['Attire', ev.attire] : null,
+      ev.notes ? ['Notes', ev.notes] : null
+    ].filter(Boolean).map(f => `<dt>${f[0]}</dt><dd>${esc(f[1])}</dd>`).join('');
+    const rosterRemove = canW && !past;
+    const fullPill = (n, cap) => !past && isFinite(cap) && n >= cap ? '<span class="pill full">Full</span>' : '';
+    const roster = `<div class="roster">
+        <h4>Lead PAL${capTxt(leads.length, leadCap)} ${fullPill(leads.length, leadCap)}</h4>${leads.length ? `<ul class="chips">${chipsHTML(leads, me, rosterRemove)}</ul>` : `<p class="empty-roster">${past ? 'None listed.' : 'Nobody yet. This event needs a lead.'}</p>`}
+      </div>
+      <div class="roster">
+        <h4>PALs${capTxt(pals.length, palCap)} ${fullPill(pals.length, palCap)}</h4>${pals.length ? `<ul class="chips">${chipsHTML(pals, me, rosterRemove)}</ul>` : `<p class="empty-roster">${past ? 'None listed.' : 'Nobody yet.'}</p>`}
+      </div>`;
+    let signup = '';
+    if (!past) {
+      const dis = canW ? '' : ' disabled';
+      const othersIn = role => (role === 'lead' ? leads : pals).filter(p => slug(p.name) !== me).length;
+      const isFull = role => othersIn(role) >= capOf(ev, role);
+      const btn = (role, primary) => {
+        const lbl = role === 'lead' ? 'Lead PAL' : 'PAL';
+        const full = isFull(role);
+        const text = full ? lbl + ' spots full' : (mineRec ? 'Switch to ' + lbl : 'Sign up as ' + lbl);
+        return `<button class="btn${primary ? ' primary' : ''}" data-action="signup" data-role="${role}" data-id="${esc(ev.id)}"${full ? ' disabled' : dis}>${text}</button>`;
+      };
+      if (mineRec) {
+        const other = mineRec.role === 'lead' ? 'pal' : 'lead';
+        signup = `<div class="signup">
+          <p class="mine">You're signed up as <b>${mineRec.role === 'lead' ? 'Lead PAL' : 'PAL'}</b>${mineRec.note ? ' · ' + esc(mineRec.note) : ''}</p>
+          <div class="btns">${btn(other, false)}
+            <button class="btn" data-action="avail" data-id="${esc(ev.id)}"${dis}>${mineRec.note ? 'Edit availability' : 'Add availability'}</button>
+            <button class="btn quiet" data-action="rm" data-sid="${esc(mineRec._id)}"${dis}>${armed === mineRec._id ? 'Tap again to remove me' : 'Remove me'}</button>
+          </div></div>`;
+      } else {
+        signup = `<div class="signup"><div class="btns">${btn('pal', true)}${btn('lead', false)}</div></div>`;
+      }
+    }
+    return `<article class="card c-${esc(ev.committee)}${past ? ' past' : ''}" id="ev-${esc(ev.id)}">
+      <div class="card-head">${tile(ev)}<h3>${esc(ev.title)}${tent(ev)}</h3></div>
+      <dl class="facts">${facts}</dl>${roster}${signup}
+      <div class="card-foot"><button class="link" data-action="edit" data-id="${esc(ev.id)}"${canW ? '' : ' disabled'}>Edit event</button></div>
+    </article>`;
+  }
+
+  /* ---------- calendar ---------- */
+  function calHTML(list, by, me) {
+    const { y, m } = view.cal, t = today();
+    const lead = new Date(y, m, 1).getDay(), dim = new Date(y, m + 1, 0).getDate();
+    const weeks = Math.ceil((lead + dim) / 7);
+    const byDate = {};
+    list.forEach(e => (byDate[e.date] = byDate[e.date] || []).push(e));
+    let cells = DAYS.map(d => `<div class="cal-dow" role="columnheader">${d}</div>`).join('');
+    for (let i = 0; i < weeks * 7; i++) {
+      const d = new Date(y, m, 1 - lead + i), iso = isoOf(d), out = d.getMonth() !== m, evs = byDate[iso] || [];
+      const chips = evs.map(e => {
+        const past = e.date < t, st = parseT(e.start);
+        return `<button class="cal-ev c-${esc(e.committee)}${past ? ' past' : ''}" data-action="open" data-cal="1" data-id="${esc(e.id)}" title="${esc(e.title + ' · ' + range(e.start, e.end))}" aria-label="${esc(e.title + ', ' + range(e.start, e.end))}"><span class="txt">${st ? t12(st, true) + ' ' : ''}${esc(e.title)}</span></button>`;
+      }).join('');
+      cells += `<div class="cal-cell${out ? ' out' : ''}${iso === t ? ' today' : ''}${iso === view.calSel ? ' sel' : ''}" role="gridcell" data-date="${iso}">
+        <button class="cal-num" data-action="cal-day" data-date="${iso}" aria-label="${esc(longDate(iso))}${evs.length ? ', ' + evs.length + ' event' + (evs.length === 1 ? '' : 's') : ''}">${d.getDate()}</button>
+        <div class="cal-evs">${chips}</div></div>`;
+    }
+    const sel = view.calSel, selEvs = byDate[sel] || [];
+    const day = `<section class="cal-day"><h3>${esc(longDate(sel))} <button class="btn quiet" data-action="add" data-date="${sel}"${state.canWrite !== false && state.db ? '' : ' disabled'}>Add event this day</button></h3>
+      ${selEvs.length ? '<div class="list">' + selEvs.map(e => rowHTML(e, by[e.id] || [], me)).join('') + '</div>' : '<p class="empty-roster">No events this day.</p>'}</section>`;
+    return `<div class="cal-head">
+        <button class="btn cal-nav" data-action="cal-prev" aria-label="Previous month">‹</button>
+        <h2>${MONTHS_LONG[m]} ${y}</h2>
+        <button class="btn cal-nav" data-action="cal-next" aria-label="Next month">›</button>
+        <button class="btn quiet" data-action="cal-today">Today</button>
+      </div>
+      <div class="legend">${Object.entries(COMMITTEES).map(([k, v]) => `<span class="c-${k}"><i></i>${esc(v)}</span>`).join('')}</div>
+      <div class="cal-grid" role="grid" aria-label="${MONTHS_LONG[m]} ${y}">${cells}</div>${day}`;
+  }
+
+  /* ---------- render ---------- */
+  function captureUI() {
+    const a = document.activeElement;
+    return a && a.id && $('#view').contains(a) ? { id: a.id, s: a.selectionStart, e: a.selectionEnd } : null;
+  }
+  function restoreUI(ui) {
+    if (!ui) return;
+    const el = document.getElementById(ui.id);
+    if (!el) return;
+    el.focus({ preventScroll: true });
+    try { el.setSelectionRange(ui.s, ui.e); } catch (e) { /* not a text input */ }
+  }
+  function schedule() { if (!raf) { raf = true; requestAnimationFrame(render); } }
+
+  function render() {
+    raf = false;
+    const ui = captureUI();
+    const { list, by } = compute();
+    const me = meSlug();
+    const t = today();
+    const up = list.filter(e => e.date >= t);
+
+    $('#term').textContent = termLabel();
+    document.querySelectorAll('.tab').forEach(b => b.setAttribute('aria-current', b.dataset.tab === view.tab ? 'page' : 'false'));
+    document.querySelectorAll('[data-n]').forEach(n => {
+      const k = n.dataset.n;
+      const c = k === 'all' ? up.length : up.filter(e => e.committee === k).length;
+      n.textContent = c; n.hidden = !state.ready.events;
+    });
+    const live = $('#live');
+    live.textContent = state.failed ? 'Offline' : state.db ? (state.ready.events && state.ready.signups ? 'Live' : 'Connecting') : (state.dbChecked ? 'Offline' : 'Connecting');
+    live.classList.toggle('on', !!(state.db && state.ready.events && state.ready.signups && !state.failed));
+
+    let banners = '';
+    if (state.dbChecked && !state.db) banners += '<div class="banner warn">Setup needed: this page is not connected to its database yet. Add your Supabase URL and key to config.js (see SETUP.md).</div>';
+    if (state.failed) banners += '<div class="banner warn">Can\'t reach the sign-up database. ' + esc(state.errMsg || '') + '</div>';
+    if ((window.__diag || []).length) banners += '<div class="banner warn"><b>Problem details:</b> ' + esc((window.__diag || []).join(' | ')) + '</div>';
+    $('#banners').innerHTML = banners;
+
+    const isCal = view.tab === 'calendar';
+    const scoped = view.tab === 'all' || isCal ? list : list.filter(e => e.committee === view.tab);
+    const pastCount = scoped.filter(e => e.date < t).length;
+    const canW = state.canWrite !== false && !!state.db;
+    $('#toolbar').innerHTML = isCal
+      ? `<span class="sp"></span><button class="btn primary" data-action="add"${canW ? '' : ' disabled'}>Add event</button>`
+      : `<label class="check"><input type="checkbox" id="t-past" data-toggle="past"${view.showPast ? ' checked' : ''}> Show past events${pastCount ? ' (' + pastCount + ')' : ''}</label>
+      <label class="check"><input type="checkbox" id="t-mine" data-toggle="mine"${view.mine ? ' checked' : ''}${me ? '' : ' disabled'}> Only events I'm on</label>
+      <span class="sp"></span>
+      <button class="btn primary" data-action="add"${canW ? '' : ' disabled'}>Add event</button>`;
+
+    let items = scoped.filter(e => view.showPast || e.date >= t);
+    if (view.mine && me) items = items.filter(e => isIn(by[e.id], me));
+
+    let html = '';
+    if (!state.db) html = '';
+    else if (!(state.ready.events && state.ready.signups)) {
+      html = '<div class="empty"><b>Loading the schedule</b>Pulling the latest sign-ups.</div>';
+    } else if (!list.length) {
+      html = '<div class="empty"><b>No events yet</b>Use "Add event" to put the first one on the schedule.' + (Object.keys((fb.SEED && fb.SEED.events) || {}).length ? '<p><button class="btn primary" data-action="seed">Load the Fall 2026 schedule</button></p>' : '') + '</div>';
+    } else if (isCal) {
+      html = calHTML(list, by, me);
+    } else if (!items.length) {
+      html = view.mine && me
+        ? '<div class="empty"><b>Nothing on your list</b>Sign up for an event and it will show up here.</div>'
+        : '<div class="empty"><b>Nothing coming up</b>Turn on "Show past events" to see earlier ones, or add a new event.</div>';
+    } else if (view.tab === 'all') {
+      let cur = '';
+      html = '<div class="list">';
+      for (const ev of items) {
+        const d = dparts(ev.date), key = d.ml + ' ' + d.y;
+        if (key !== cur) { cur = key; html += `</div><h2 class="month">${esc(key)}</h2><div class="list">`; }
+        html += rowHTML(ev, by[ev.id] || [], me);
+      }
+      html += '</div>';
+    } else {
+      html = '<div class="cards">' + items.map(ev => cardHTML(ev, by[ev.id] || [], me)).join('') + '</div>';
+    }
+    $('#view').innerHTML = html;
+
+    restoreUI(ui);
+    if (view.focusId) {
+      const el = document.getElementById('ev-' + view.focusId);
+      if (el) { el.scrollIntoView({ block: 'start' }); el.classList.add('flash'); }
+      view.focusId = null;
+    }
+  }
+
+  /* ---------- toast + errors ---------- */
+  function toast(msg) {
+    const el = $('#toast'); el.textContent = msg; el.hidden = false;
+    clearTimeout(toastTimer); toastTimer = setTimeout(() => { el.hidden = true; }, 3800);
+  }
+  function writeFail(e) {
+    const c = e && e.code;
+    toast(c === 'full' ? e.message
+      : c === 'permission-denied' ? "That didn't save. The database permissions are blocking edits (see SETUP.md)."
+      : c === '54000' ? 'The sign-up database is full. Delete old events to make room.'
+      : "Couldn't save. Check your connection and try again.");
+  }
+
+  /* ---------- name combo box ---------- */
+  const whoList = $('#who-list');
+  let comboIdx = -1;
+  const roster = () => Object.values(state.pals).sort((a, b) => a.localeCompare(b));
+  function comboItems(all) {
+    const v = who.value.trim().toLowerCase(), names = roster();
+    if (all || !v || names.some(n => n.toLowerCase() === v)) return names;
+    return names.filter(n => n.toLowerCase().includes(v));
+  }
+  function openCombo(all) {
+    const items = comboItems(all), v = who.value.trim().toLowerCase();
+    if (!items.length) { closeCombo(); return; }
+    whoList.innerHTML = items.map((n, i) => `<li role="option" id="who-o${i}" data-name="${esc(n)}" aria-selected="${n.toLowerCase() === v}">${esc(n)}</li>`).join('');
+    whoList.hidden = false; who.setAttribute('aria-expanded', 'true'); comboIdx = -1;
+    const sel = whoList.querySelector('[aria-selected="true"]'); if (sel) sel.scrollIntoView({ block: 'nearest' });
+  }
+  function closeCombo() { whoList.hidden = true; who.setAttribute('aria-expanded', 'false'); comboIdx = -1; }
+  function pickName(n) { who.value = n; store.set('pal-name', n); closeCombo(); schedule(); }
+  function moveCombo(dir) {
+    const opts = [...whoList.children]; if (!opts.length) return;
+    opts.forEach(o => o.classList.remove('act'));
+    comboIdx = (comboIdx + dir + opts.length) % opts.length;
+    opts[comboIdx].classList.add('act'); opts[comboIdx].scrollIntoView({ block: 'nearest' });
+    who.setAttribute('aria-activedescendant', opts[comboIdx].id);
+  }
+  who.addEventListener('focus', () => openCombo(false));
+  who.addEventListener('click', () => { if (whoList.hidden) openCombo(false); });
+  who.addEventListener('input', () => { store.set('pal-name', who.value); openCombo(false); schedule(); });
+  who.addEventListener('keydown', e => {
+    if (e.key === 'ArrowDown') { e.preventDefault(); if (whoList.hidden) openCombo(true); else moveCombo(1); }
+    else if (e.key === 'ArrowUp') { e.preventDefault(); if (whoList.hidden) openCombo(true); else moveCombo(-1); }
+    else if (e.key === 'Enter' && !whoList.hidden && comboIdx >= 0) { e.preventDefault(); pickName(whoList.children[comboIdx].dataset.name); }
+    else if (e.key === 'Escape') closeCombo();
+    else if (e.key === 'Tab') closeCombo();
+  });
+  $('#who-btn').addEventListener('mousedown', e => e.preventDefault());
+  whoList.addEventListener('mousedown', e => e.preventDefault());
+  whoList.addEventListener('click', e => { const li = e.target.closest('li'); if (li) pickName(li.dataset.name); });
+
+  /* ---------- sign-up flow (confirm, then optional availability) ---------- */
+  function currentName() {
+    const raw = who.value.trim();
+    if (!raw) return '';
+    const n = titleCase(raw), key = slug(n);
+    return state.pals[key] || n;
+  }
+  function openFlow(eventId, role) {
+    const ev = state.events[eventId]; if (!ev || !state.db) return;
+    if (!who.value.trim()) { toast('Type your first name at the top first.'); who.focus(); return; }
+    if (!slug(who.value)) { toast('Use letters or numbers in your name.'); return; }
+    flow = { eventId, role, step: 'confirm', busy: false };
+    renderFlow(); $('#smodal').hidden = false;
+  }
+  function openAvail(eventId) {
+    flow = { eventId, step: 'avail', edit: true, busy: false };
+    renderFlow(); $('#smodal').hidden = false;
+  }
+  function closeFlow() { $('#smodal').hidden = true; flow = null; }
+  function myRec(eventId) { return state.signups[eventId + '__' + slug(currentName())]; }
+  function renderFlow() {
+    if (!flow) return;
+    const ev = state.events[flow.eventId]; if (!ev) { closeFlow(); return; }
+    const name = currentName(), rec = myRec(flow.eventId);
+    const facts = `<dl class="facts"><dt>Name</dt><dd>${esc(name)}</dd><dt>Event</dt><dd>${esc(ev.title)}</dd><dt>When</dt><dd>${esc(longDate(ev.date))} · ${esc(range(ev.start, ev.end))}</dd>${ev.palStart ? `<dt>PAL time</dt><dd>${esc(range(ev.palStart, ev.palEnd))}</dd>` : ''}${ev.location ? `<dt>Location</dt><dd>${esc(ev.location)}</dd>` : ''}</dl>`;
+    const roleName = flow.role === 'lead' ? 'Lead PAL' : 'PAL';
+    if (flow.step === 'confirm') {
+      $('#s-title').textContent = 'Confirm your sign-up';
+      const switching = rec && rec.role !== flow.role ? `<p class="note-box">You're currently signed up as ${rec.role === 'lead' ? 'Lead PAL' : 'PAL'}. This will switch you to ${roleName}.</p>` : '';
+      $('#s-body').innerHTML = `<p>Sign up as <b>${roleName}</b> for this event?</p>${facts}${switching}
+        <p class="hint" style="margin-top:10px">Not you? Cancel and change the name at the top of the page.</p>
+        <div class="btns"><span class="btns"><button class="btn primary" id="s-confirm" data-action="flow-confirm"${flow.busy ? ' disabled' : ''}>${flow.busy ? 'Saving…' : 'Confirm sign-up'}</button><button class="btn" data-action="flow-cancel">Cancel</button></span></div>`;
+      const b = $('#s-confirm'); if (b) b.focus();
+    } else {
+      $('#s-title').textContent = flow.edit ? 'Your availability' : "You're signed up!";
+      $('#s-body').innerHTML = `<form id="s-form" autocomplete="off">
+        ${flow.edit ? facts : `<p>You're on the list as <b>${esc(rec && rec.role === 'lead' ? 'Lead PAL' : 'PAL')}</b> for <b>${esc(ev.title)}</b>.</p>`}
+        <p>Can only stay for part of the event? Add your availability. This is optional.</p>
+        <label><span class="fieldlbl">Availability (optional)</span><input id="s-note" maxlength="60" placeholder="e.g. 4–6 PM" value="${esc((rec && rec.note) || '')}"></label>
+        <div class="btns"><span class="btns"><button class="btn primary" type="submit"${flow.busy ? ' disabled' : ''}>Save availability</button><button class="btn" type="button" data-action="flow-done">${flow.edit ? 'Cancel' : 'Skip'}</button></span></div></form>`;
+      const i = $('#s-note'); if (i) i.focus();
+    }
+  }
+  async function commitSignup(eventId, role) {
+    const ev = state.events[eventId], name = currentName(), key = slug(name);
+    if (!ev || !key) return false;
+    // re-read right before writing so two people grabbing the last spot don't both get it
+    const fresh = await state.db.collection('signups').get();
+    const mine = eventId + '__' + key;
+    const others = fresh.docs.map(d => ({ id: d.id, ...d.data() })).filter(s => s.eventId === eventId && s.role === role && s.id !== mine).length;
+    if (others >= capOf(ev, role)) { const e = new Error((role === 'lead' ? 'Lead PAL' : 'PAL') + ' spots just filled up for this event.'); e.code = 'full'; throw e; }
+    const prev = state.signups[mine];
+    await state.db.collection('signups').doc(mine).set({ eventId, name, role, note: (prev && prev.note) || '', at: (prev && prev.at) || Date.now() });
+    if (!state.pals[key]) await state.db.collection('pals').doc(key).set({ name });
+    return true;
+  }
+  async function flowConfirm() {
+    if (!flow || flow.busy) return;
+    flow.busy = true; renderFlow();
+    try {
+      await commitSignup(flow.eventId, flow.role);
+      flow.busy = false; flow.step = 'avail'; flow.edit = false; renderFlow();
+    } catch (e) { flow.busy = false; closeFlow(); writeFail(e); }
+  }
+  async function flowSaveNote() {
+    if (!flow || flow.busy) return;
+    const rec = myRec(flow.eventId), note = ($('#s-note').value || '').trim().slice(0, 60);
+    if (!rec) { closeFlow(); return; }
+    if (note === (rec.note || '')) { const e = flow.edit; closeFlow(); if (!e) toast("You're signed up."); return; }
+    flow.busy = true; renderFlow();
+    try {
+      await state.db.collection('signups').doc(rec._id).set({ eventId: rec.eventId, name: rec.name, role: rec.role, note, at: rec.at || Date.now() });
+      closeFlow(); toast('Availability saved.');
+    } catch (e) { flow.busy = false; renderFlow(); writeFail(e); }
+  }
+  async function removeSignup(sid) {
+    if (!state.db) return;
+    try { await state.db.collection('signups').doc(sid).delete(); toast('Removed.'); } catch (e) { writeFail(e); }
+  }
+
+  /* ---------- event form ---------- */
+  const F = id => document.getElementById(id);
+  function openForm(id, presetDate) {
+    editingId = id || null;
+    const ev = id ? state.events[id] : null;
+    $('#m-title').textContent = ev ? 'Edit event' : 'Add event';
+    F('f-title').value = ev ? ev.title : '';
+    F('f-committee').value = ev ? ev.committee : (COMMITTEES[view.tab] ? view.tab : 'cohort');
+    F('f-date').value = ev ? ev.date : (presetDate || '');
+    F('f-start').value = ev ? ev.start || '' : '';
+    F('f-end').value = ev ? ev.end || '' : '';
+    F('f-pstart').value = ev ? ev.palStart || '' : '';
+    F('f-pend').value = ev ? ev.palEnd || '' : '';
+    F('f-maxleads').value = ev && Number(ev.maxLeads) > 0 ? ev.maxLeads : '';
+    F('f-maxpals').value = ev && Number(ev.maxPals) > 0 ? ev.maxPals : '';
+    F('f-location').value = ev ? ev.location || '' : '';
+    F('f-attire').value = ev ? ev.attire || '' : DEFAULT_ATTIRE;
+    F('f-notes').value = ev ? ev.notes || '' : '';
+    F('f-tent').checked = ev ? !!ev.tentative : false;
+    const del = F('f-delete'); del.hidden = !ev; del.textContent = 'Delete event'; del.dataset.armed = '';
+    $('#modal').hidden = false;
+    F('f-title').focus();
+  }
+  function closeForm() { $('#modal').hidden = true; editingId = null; }
+  const capVal = v => { const n = parseInt(v, 10); return n > 0 ? Math.min(n, 99) : null; };
+
+  $('#evform').addEventListener('submit', async e => {
+    e.preventDefault();
+    if (!state.db) return;
+    const data = {
+      title: F('f-title').value.trim(), committee: F('f-committee').value, date: F('f-date').value,
+      start: F('f-start').value, end: F('f-end').value, palStart: F('f-pstart').value, palEnd: F('f-pend').value,
+      maxLeads: capVal(F('f-maxleads').value), maxPals: capVal(F('f-maxpals').value),
+      location: F('f-location').value.trim(), attire: F('f-attire').value.trim(), notes: F('f-notes').value.trim(),
+      tentative: F('f-tent').checked
+    };
+    if (!data.title || !data.date || !data.start) return;
+    const btn = F('f-save'); btn.disabled = true;
+    try {
+      if (editingId) await state.db.collection('events').doc(editingId).set(data);
+      else await state.db.collection('events').add(data);
+      closeForm(); toast('Event saved.');
+    } catch (err) { writeFail(err); } finally { btn.disabled = false; }
+  });
+
+  async function deleteEvent() {
+    const b = F('f-delete');
+    if (b.dataset.armed !== '1') { b.dataset.armed = '1'; b.textContent = 'Tap again to delete'; return; }
+    const id = editingId; if (!id || !state.db) return;
+    b.disabled = true;
+    try {
+      const mine = Object.values(state.signups).filter(s => s.eventId === id);
+      for (const s of mine) await state.db.collection('signups').doc(s._id).delete();
+      await state.db.collection('events').doc(id).delete();
+      closeForm(); toast('Event deleted.');
+    } catch (e) { writeFail(e); } finally { b.disabled = false; }
+  }
+
+  /* ---------- export: PDF report (built in the page, no libraries) ---------- */
+  const rgbOf = h => { const n = parseInt(h.slice(1), 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255].map(v => (v / 255).toFixed(3)).join(' '); };
+  const WIN1252 = { '–': 0x96, '—': 0x97, '‘': 0x91, '’': 0x92, '“': 0x93, '”': 0x94, '•': 0x95, '…': 0x85 };
+  const pdfHex = str => { let o = ''; for (const ch of String(str)) { let c = ch.codePointAt(0); if (WIN1252[ch]) c = WIN1252[ch]; else if (c > 255 || (c >= 128 && c < 160)) c = 63; o += c.toString(16).padStart(2, '0'); } return '<' + o + '>'; };
+  const measureCtx = document.createElement('canvas').getContext('2d');
+  const tw = (str, size, f) => { measureCtx.font = (f === 'b' ? 'bold ' : f === 'i' ? 'italic ' : '') + size + 'px Arial, Helvetica, sans-serif'; return measureCtx.measureText(str).width; };
+  function wrapText(str, width, size, f) {
+    const words = String(str).split(/\s+/).filter(Boolean), lines = []; let cur = '';
+    for (const w of words) {
+      const t = cur ? cur + ' ' + w : w;
+      if (tw(t, size, f) <= width || !cur) cur = t; else { lines.push(cur); cur = w; }
+    }
+    if (cur) lines.push(cur);
+    return lines.length ? lines : [''];
+  }
+  const PAL = { green: '#006747', evergreen: '#005432', gold: '#CFC493', sand: '#EDEBD1', storm: '#006484', silver: '#CAD2D8', slate: '#466069', ink: '#303434', lemon: '#DBE442', white: '#FFFFFF' };
+  const COM_COLOR = { htc: PAL.storm, cohort: PAL.green, meetgo: PAL.gold };
+  const COM_INK = { htc: PAL.white, cohort: PAL.white, meetgo: PAL.ink };
+
+  function makeReportPDF(scope, com) {
+    const { list, by } = compute(), t = today();
+    const evs = list.filter(e => (com === 'all' || e.committee === com) && (scope === 'all' || e.date >= t));
+    const W = 612, H = 792, M = 40, CW = 532, BOTTOM = H - 52;
+    const pages = []; let cur = null, y = 0;
+    const rect = (x, top, w, h, fill) => cur.push(`${rgbOf(fill)} rg ${x.toFixed(2)} ${(H - top - h).toFixed(2)} ${w.toFixed(2)} ${h.toFixed(2)} re f`);
+    const frame = (x, top, w, h, stroke, lw) => cur.push(`${rgbOf(stroke)} RG ${lw} w ${x.toFixed(2)} ${(H - top - h).toFixed(2)} ${w.toFixed(2)} ${h.toFixed(2)} re S`);
+    const hline = (x1, x2, yy, stroke, lw) => cur.push(`${rgbOf(stroke)} RG ${lw} w ${x1} ${(H - yy).toFixed(2)} m ${x2} ${(H - yy).toFixed(2)} l S`);
+    const text = (str, x, base, size, f, color, align) => {
+      let xx = x; if (align === 'r') xx = x - tw(str, size, f); else if (align === 'c') xx = x - tw(str, size, f) / 2;
+      cur.push(`BT ${rgbOf(color)} rg /${f === 'b' ? 'F2' : f === 'i' ? 'F3' : 'F1'} ${size} Tf ${xx.toFixed(2)} ${(H - base).toFixed(2)} Td ${pdfHex(str)} Tj ET`);
+    };
+    const comLabel = com === 'all' ? 'All committees' : COMMITTEES[com];
+    const scopeLabel = scope === 'all' ? 'All events' : 'Current events';
+    const term = termLabel();
+
+    function newPage(first) {
+      cur = []; pages.push(cur);
+      if (first) {
+        rect(0, 0, W, 96, PAL.green); rect(0, 96, W, 5, PAL.gold);
+        text('PAL Event Sign-Ups', M, 50, 28, 'b', PAL.white);
+        text(term + '  ·  ' + comLabel + '  ·  ' + scopeLabel, M, 72, 11, 'f', PAL.sand);
+        text('Generated ' + longDate(today()), W - M, 50, 9, 'f', PAL.sand, 'r');
+        y = 122;
+      } else {
+        rect(0, 0, W, 34, PAL.green); rect(0, 34, W, 3, PAL.gold);
+        text('PAL Event Sign-Ups', M, 22, 11, 'b', PAL.white);
+        text(comLabel + '  ·  ' + scopeLabel, W - M, 22, 9, 'f', PAL.sand, 'r');
+        y = 62;
+      }
+    }
+    function monthHeader(label) {
+      text(label.toUpperCase(), M, y + 10, 11, 'b', PAL.slate);
+      hline(M, M + CW, y + 16, PAL.silver, 0.75);
+      y += 26;
+    }
+
+    newPage(true);
+    // summary tiles
+    const allP = evs.flatMap(e => by[e.id] || []);
+    const stats = [
+      [String(evs.length), 'EVENTS'],
+      [String(allP.filter(p => p.role === 'lead').length), 'LEAD PAL SIGN-UPS'],
+      [String(allP.filter(p => p.role !== 'lead').length), 'PAL SIGN-UPS'],
+      [String(evs.filter(e => e.date >= t && !(by[e.id] || []).some(p => p.role === 'lead')).length), 'UPCOMING NEED A LEAD']
+    ];
+    const tileW = (CW - 30) / 4;
+    stats.forEach((s, i) => {
+      const x = M + i * (tileW + 10);
+      rect(x, y, tileW, 62, PAL.sand);
+      rect(x, y, 4, 62, i === 3 ? PAL.lemon : PAL.green);
+      text(s[0], x + 16, y + 38, 28, 'b', PAL.evergreen);
+      text(s[1], x + 16, y + 54, 7.5, 'b', PAL.slate);
+    });
+    y += 62 + 16;
+    // legend
+    let lx = M;
+    Object.keys(COMMITTEES).forEach(k => {
+      rect(lx, y - 7, 9, 9, COM_COLOR[k]); text(COMMITTEES[k], lx + 14, y + 1, 9, 'f', PAL.ink);
+      lx += 14 + tw(COMMITTEES[k], 9, 'f') + 22;
+    });
+    y += 22;
+
+    if (!evs.length) { text('No events match these choices.', M, y + 14, 12, 'f', PAL.slate); }
+
+    const x0 = M + 54 + 12, cWid = M + CW - 10 - x0, LAB = 72;
+    let lastMonth = '';
+    for (const ev of evs) {
+      const people = by[ev.id] || [], leads = people.filter(p => p.role === 'lead'), pals = people.filter(p => p.role !== 'lead');
+      const past = ev.date < t, d = dparts(ev.date), monthKey = d.ml + ' ' + d.y;
+      const pillTxt = (COMMITTEES[ev.committee] || ev.committee), pillW = tw(pillTxt, 7.5, 'b') + 14;
+      const titleLines = wrapText(ev.title, cWid - pillW - 10, 13, 'b');
+      const meta = [ev.tentative ? 'TENTATIVE' : '', range(ev.start, ev.end), ev.palStart ? 'PAL time ' + range(ev.palStart, ev.palEnd) : '', ev.location].filter(Boolean).join('  ·  ');
+      const metaLines = wrapText(meta, cWid, 9, 'f');
+      const noteLines = ev.notes ? wrapText('Note: ' + ev.notes, cWid, 8.5, 'i') : [];
+      const leadCap = capOf(ev, 'lead'), palCap = capOf(ev, 'pal');
+      const leadLbl = 'LEAD PAL' + (isFinite(leadCap) ? '  ' + leads.length + '/' + leadCap : '');
+      const palLbl = 'PALS' + (isFinite(palCap) ? '  ' + pals.length + '/' + palCap : (pals.length ? '  ' + pals.length : ''));
+      const leadLines = leads.length ? wrapText(leads.map(who_).join(', '), cWid - LAB, 10, 'f') : [''];
+      const palLines = pals.length ? wrapText(pals.map(who_).join(', '), cWid - LAB, 10, 'f') : [''];
+      const h = Math.max(70, 10 + titleLines.length * 16 + 2 + metaLines.length * 12 + (noteLines.length ? noteLines.length * 11 + 2 : 0) + 8 + leadLines.length * 14 + 2 + palLines.length * 14 + 10);
+      const newMonth = monthKey !== lastMonth;
+      if (y + (newMonth ? 26 : 0) + h > BOTTOM) { newPage(false); lastMonth = ''; }
+      if (monthKey !== lastMonth) { monthHeader(monthKey); lastMonth = monthKey; }
+      // card
+      frame(M, y, CW, h, PAL.silver, 0.75);
+      rect(M, y, 54, h, COM_COLOR[ev.committee] || PAL.slate);
+      const ink = COM_INK[ev.committee] || PAL.white, mid = y + h / 2;
+      text(d.m.toUpperCase(), M + 27, mid - 14, 8.5, 'b', ink, 'c');
+      text(String(d.d), M + 27, mid + 9, 24, 'b', ink, 'c');
+      text(d.w.toUpperCase(), M + 27, mid + 22, 8.5, 'b', ink, 'c');
+      let cy = y + 10;
+      titleLines.forEach((ln, i) => { text(ln, x0, cy + 11 + i * 16, 13, 'b', PAL.ink); });
+      const px = M + CW - 10 - pillW;
+      rect(px, cy, pillW, 13, COM_COLOR[ev.committee] || PAL.slate);
+      text(pillTxt, px + pillW / 2, cy + 9.5, 7.5, 'b', ink, 'c');
+      cy += titleLines.length * 16 + 2;
+      metaLines.forEach((ln, i) => text(ln, x0, cy + 9 + i * 12, 9, 'f', PAL.slate));
+      cy += metaLines.length * 12;
+      if (noteLines.length) { noteLines.forEach((ln, i) => text(ln, x0, cy + 9 + i * 11, 8.5, 'i', PAL.slate)); cy += noteLines.length * 11 + 2; }
+      cy += 8;
+      hline(x0, M + CW - 10, cy - 4, PAL.sand, 1);
+      // lead row
+      text(leadLbl, x0, cy + 9, 7.5, 'b', PAL.slate);
+      if (leads.length) leadLines.forEach((ln, i) => text(ln, x0 + LAB, cy + 9 + i * 14, 10, 'f', PAL.ink));
+      else if (!past) { const lw = tw('NEEDS A LEAD', 7.5, 'b') + 12; rect(x0 + LAB, cy, lw, 13, PAL.lemon); text('NEEDS A LEAD', x0 + LAB + 6, cy + 9.5, 7.5, 'b', PAL.ink); }
+      else text('None listed', x0 + LAB, cy + 9, 10, 'f', PAL.slate);
+      cy += leadLines.length * 14 + 2;
+      // pal row
+      text(palLbl, x0, cy + 9, 7.5, 'b', PAL.slate);
+      if (pals.length) palLines.forEach((ln, i) => text(ln, x0 + LAB, cy + 9 + i * 14, 10, 'f', PAL.ink));
+      else text(past ? 'None listed' : 'No PALs yet', x0 + LAB, cy + 9, 10, 'f', PAL.slate);
+      y += h + 8;
+    }
+
+    // footers
+    pages.forEach((ops, i) => {
+      cur = ops;
+      hline(M, M + CW, H - 34, PAL.silver, 0.75);
+      text('PAL Event Sign-Ups  ·  ' + term, M, H - 20, 8, 'f', PAL.slate);
+      text('Page ' + (i + 1) + ' of ' + pages.length, M + CW, H - 20, 8, 'f', PAL.slate, 'r');
+    });
+
+    // assemble the PDF file
+    const objs = [];
+    const n = pages.length, kids = pages.map((_, i) => (8 + 2 * i) + ' 0 R').join(' ');
+    objs[1] = '<< /Type /Catalog /Pages 2 0 R >>';
+    objs[2] = `<< /Type /Pages /Kids [${kids}] /Count ${n} >>`;
+    objs[3] = '<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>';
+    objs[4] = '<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>';
+    objs[5] = '<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Oblique /Encoding /WinAnsiEncoding >>';
+    objs[6] = `<< /Title ${pdfHex('PAL Event Sign-Ups - ' + comLabel + ' - ' + scopeLabel)} /Producer (PAL Event Sign-Ups) >>`;
+    pages.forEach((ops, i) => {
+      const body = ops.join('\n');
+      objs[6 + 2 * i + 2] = `<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${W} ${H}] /Resources << /Font << /F1 3 0 R /F2 4 0 R /F3 5 0 R >> >> /Contents ${6 + 2 * i + 1} 0 R >>`;
+      objs[6 + 2 * i + 1] = `<< /Length ${body.length} >>\nstream\n${body}\nendstream`;
+    });
+    let out = '%PDF-1.4\n'; const offs = [];
+    for (let i = 1; i < objs.length; i++) { offs[i] = out.length; out += `${i} 0 obj\n${objs[i]}\nendobj\n`; }
+    const xref = out.length;
+    out += `xref\n0 ${objs.length}\n0000000000 65535 f \n` + offs.slice(1).map(o => String(o).padStart(10, '0') + ' 00000 n \n').join('');
+    out += `trailer\n<< /Size ${objs.length} /Root 1 0 R /Info 6 0 R >>\nstartxref\n${xref}\n%%EOF`;
+    return { blob: new Blob([out], { type: 'application/pdf' }), count: evs.length, pages: n, comLabel, scope };
+  }
+  const who_ = p => p.name + (p.note ? ' (' + p.note + ')' : '');
+  function saveBlob(blob, name) {
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name;
+    document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 800);
+  }
+  function doExport() {
+    const scope = (document.querySelector('input[name="x-scope"]:checked') || {}).value || 'current';
+    const com = (document.querySelector('input[name="x-com"]:checked') || {}).value || 'all';
+    const btn = $('#x-go');
+    try {
+      const r = makeReportPDF(scope, com);
+      if (!r.count) { toast('No events match those choices.'); return; }
+      const fname = 'PAL-Signups_' + (com === 'all' ? 'All-Committees' : COMMITTEES[com].replace(/[^A-Za-z0-9]+/g, '')) + '_' + (scope === 'all' ? 'All-Events' : 'Current') + '_' + today() + '.pdf';
+      saveBlob(r.blob, fname);
+      toast('PDF report downloaded (' + r.count + ' event' + (r.count === 1 ? '' : 's') + ').');
+      closeMenu();
+    } catch (e) { toast("Couldn't build the report. Try again."); window.__diag && window.__diag.push('PDF: ' + e.message); }
+  }
+  function closeMenu() { $('#menu-panel').hidden = true; $('#menu-btn').setAttribute('aria-expanded', 'false'); }
+  function toggleMenu() {
+    const p = $('#menu-panel'); const open = p.hidden;
+    p.hidden = !open; $('#menu-btn').setAttribute('aria-expanded', String(open));
+  }
+
+  /* ---------- events ---------- */
+  function setTab(tab) {
+    view.tab = TABS.includes(tab) ? tab : 'all';
+    if (location.hash.slice(1) !== view.tab) location.hash = view.tab;
+    render();
+  }
+  function calMove(n) {
+    let m = view.cal.m + n, y = view.cal.y;
+    while (m < 0) { m += 12; y--; } while (m > 11) { m -= 12; y++; }
+    view.cal = { y, m }; view.calSel = isoOf(new Date(y, m, 1)); render();
+  }
+  document.addEventListener('click', e => {
+    if (!e.target.closest('.combo')) closeCombo();
+    if (!e.target.closest('.menu-wrap')) closeMenu();
+    const dt = e.target.closest('[data-toggle]');
+    if (dt) {
+      if (dt.dataset.toggle === 'past') { view.showPast = dt.checked; store.set('pal-past', dt.checked ? '1' : '0'); }
+      else view.mine = dt.checked;
+      render(); return;
+    }
+    const el = e.target.closest('[data-action]');
+    if (el) {
+      const a = el.dataset.action;
+      if (a === 'tab') setTab(el.dataset.tab);
+      else if (a === 'open') {
+        const ev = state.events[el.dataset.id]; if (!ev) return;
+        if (el.dataset.cal && isMobile()) { view.calSel = ev.date; render(); return; }
+        view.focusId = el.dataset.id; view.showPast = view.showPast || ev.date < today(); setTab(ev.committee);
+      }
+      else if (a === 'signup') openFlow(el.dataset.id, el.dataset.role);
+      else if (a === 'avail') openAvail(el.dataset.id);
+      else if (a === 'flow-confirm') flowConfirm();
+      else if (a === 'flow-cancel' || a === 'flow-done') closeFlow();
+      else if (a === 'rm') {
+        const sid = el.dataset.sid;
+        if (armed === sid) { clearTimeout(armedTimer); armed = null; removeSignup(sid); }
+        else { armed = sid; clearTimeout(armedTimer); armedTimer = setTimeout(() => { armed = null; schedule(); }, 3500); schedule(); }
+      }
+      else if (a === 'add') openForm(null, el.dataset.date);
+      else if (a === 'edit') openForm(el.dataset.id);
+      else if (a === 'close') closeForm();
+      else if (a === 'delete') deleteEvent();
+      else if (a === 'seed') window.__seed();
+      else if (a === 'menu-toggle') toggleMenu();
+      else if (a === 'export') doExport();
+      else if (a === 'combo-toggle') { if (whoList.hidden) openCombo(true); else closeCombo(); }
+      else if (a === 'cal-prev') calMove(-1);
+      else if (a === 'cal-next') calMove(1);
+      else if (a === 'cal-today') { const n = new Date(); view.cal = { y: n.getFullYear(), m: n.getMonth() }; view.calSel = today(); render(); }
+      else if (a === 'cal-day') { view.calSel = el.dataset.date; const p = el.dataset.date.split('-').map(Number); if (p[1] - 1 !== view.cal.m || p[0] !== view.cal.y) view.cal = { y: p[0], m: p[1] - 1 }; render(); }
+      return;
+    }
+    const cell = e.target.closest('.cal-cell');
+    if (cell) { view.calSel = cell.dataset.date; const p = cell.dataset.date.split('-').map(Number); if (p[1] - 1 !== view.cal.m || p[0] !== view.cal.y) view.cal = { y: p[0], m: p[1] - 1 }; render(); }
+  });
+  $('#s-body').addEventListener('submit', e => { e.preventDefault(); flowSaveNote(); });
+  document.addEventListener('keydown', e => {
+    if (e.key !== 'Escape') return;
+    if (!$('#smodal').hidden) closeFlow();
+    else if (!$('#modal').hidden) closeForm();
+    else closeMenu();
+  });
+  $('#modal').addEventListener('mousedown', e => { if (e.target.id === 'modal') closeForm(); });
+  $('#smodal').addEventListener('mousedown', e => { if (e.target.id === 'smodal') closeFlow(); });
+  window.addEventListener('hashchange', () => { const t = location.hash.slice(1); if (TABS.includes(t) && t !== view.tab) { view.tab = t; render(); } });
+  view.tab = TABS.includes(location.hash.slice(1)) ? location.hash.slice(1) : 'all';
+
+  /* ---------- data (Supabase) ---------- */
+  render();
+  const sb = fb.sb;
+  const loaders = {};
+  window.__render = render;
+  const fail = e => { state.failed = true; state.errMsg = e && (e.message || e.code) || ''; render(); };
+  const check = r => { if (r.error) { const e = new Error(r.error.message); e.code = (r.error.code === '42501' || r.error.status === 401 || r.error.status === 403) ? 'permission-denied' : r.error.code; throw e; } };
+  const wrap = {
+    collection(name) {
+      return {
+        doc(id) {
+          return {
+            set: async d => { check(await sb.from(name).upsert({ id, data: d })); loaders[name] && loaders[name](); },
+            delete: async () => { check(await sb.from(name).delete().eq('id', id)); loaders[name] && loaders[name](); }
+          };
+        },
+        add: async d => { check(await sb.from(name).upsert({ id: 'e' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6), data: d })); loaders[name] && loaders[name](); },
+        get: async () => { const r = await sb.from(name).select('id,data'); check(r); return { docs: r.data.map(row => ({ id: row.id, data: () => row.data })) }; },
+        onSnapshot(next, err) {
+          let t = null;
+          const load = async () => {
+            const r = await sb.from(name).select('id,data');
+            if (r.error) { err && err(r.error); return; }
+            state.failed = false;
+            next({ docs: r.data.map(row => ({ id: row.id, data: () => row.data })) });
+          };
+          loaders[name] = load;
+          load();
+          sb.channel('rt-' + name).on('postgres_changes', { event: '*', schema: 'public', table: name }, () => { clearTimeout(t); t = setTimeout(load, 120); }).subscribe();
+          setInterval(load, 30000);
+          document.addEventListener('visibilitychange', () => { if (!document.hidden) load(); });
+        }
+      };
+    }
+  };
+  state.db = fb.ok ? wrap : null;
+  state.dbChecked = true;
+  if (!state.db) { render(); return; }
+  wrap.collection('events').onSnapshot(snap => {
+    const o = {}; snap.docs.forEach(d => { o[d.id] = { ...d.data() }; });
+    state.events = o; state.ready.events = true; schedule();
+  }, fail);
+  wrap.collection('signups').onSnapshot(snap => {
+    const o = {}; snap.docs.forEach(d => { o[d.id] = { ...d.data(), _id: d.id }; });
+    state.signups = o; state.ready.signups = true; schedule();
+    if (flow) renderFlowSoft();
+  }, fail);
+  wrap.collection('pals').onSnapshot(snap => {
+    const o = {}; snap.docs.forEach(d => { const n = (d.data() || {}).name; if (n) o[d.id] = n; });
+    state.pals = o; schedule();
+  }, fail);
+  // keep the confirm screen's buttons/text fresh without stealing focus from the availability box
+  function renderFlowSoft() { if (flow && flow.step === 'confirm' && !flow.busy) renderFlow(); }
+
+  window.__seed = async function () {
+    if (!state.db || Object.keys(state.events).length) return;
+    try {
+      for (const c of ['events', 'signups', 'pals']) {
+        const rows = Object.entries(fb.SEED[c]).map(([id, d]) => ({ id, data: d }));
+        check(await sb.from(c).upsert(rows));
+      }
+      for (const c of ['events', 'signups', 'pals']) loaders[c] && loaders[c]();
+      toast('Fall 2026 schedule loaded.');
+    } catch (e) { writeFail(e); }
+  };
+})();
+</script>
+</body></html>
