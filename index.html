@@ -114,6 +114,7 @@ input:focus,select:focus{border-color:var(--focus)}
 .flyer-act a.btn{text-decoration:none;display:inline-flex;align-items:center}
 .flyer-act a.btn:not(.primary){color:var(--fg)}
 .fgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px}
+.fcard.todo{box-shadow:inset 5px 0 0 var(--red)}
 .fcard{background:var(--surface,#fff);border:1px solid #cad2d8;border-radius:6px;padding:14px}
 .fcard .fthumb{width:100%;max-height:none;height:auto}
 .fcard .fpdf{width:100%;height:140px}
@@ -475,12 +476,12 @@ try {
     let h = '';
     if (has.length) h += '<div class="fgrid">' + has.map(ev => {
       const when = ev.date ? longDate(ev.date) + (ev.start ? ' · ' + range(ev.start, ev.end) : '') : 'Date to be set';
-      return `<article class="fcard c-${esc(ev.committee)}"><div class="fhead">${tile(ev)}<div><b>${esc(ev.title)}</b><small>${esc(when)}</small></div></div>${flyerHTML(ev, canW)}</article>`;
+      return `<article class="fcard c-${esc(ev.committee)}${isDraft(ev) ? ' todo' : ''}"><div class="fhead">${tile(ev)}<div><b>${esc(ev.title)}${tent(ev)}</b><small>${esc(when)}</small></div></div>${flyerHTML(ev, canW)}</article>`;
     }).join('') + '</div>';
     else h += '<div class="empty"><b>No flyers yet</b>Open an event and tap "Upload flyer", or use the buttons below.</div>';
     if (no.length) h += `<h2 class="month">Still need a flyer (${no.length})</h2><div class="list">` + no.map(ev => {
       const when = ev.date ? longDate(ev.date) : 'Date to be set';
-      return `<div class="row c-${esc(ev.committee)}" style="cursor:default">${tile(ev)}<span><span class="row-title">${esc(ev.title)}${chip(ev.committee)}</span><span class="row-meta">${esc(when)}</span></span><span class="row-cov">${canW ? `<button class="btn" data-action="flyer-pick" data-id="${esc(ev.id)}"${flyerBusy === ev.id ? ' disabled' : ''}>${flyerBusy === ev.id ? 'Uploading…' : 'Upload flyer'}</button>` : ''}</span></div>`;
+      return `<div class="row c-${esc(ev.committee)}${isDraft(ev) ? ' todo' : ''}" style="cursor:default">${tile(ev)}<span><span class="row-title">${esc(ev.title)}${chip(ev.committee)}${tent(ev)}</span><span class="row-meta">${esc(when)}</span></span><span class="row-cov">${canW ? `<button class="btn" data-action="flyer-pick" data-id="${esc(ev.id)}"${flyerBusy === ev.id ? ' disabled' : ''}>${flyerBusy === ev.id ? 'Uploading…' : 'Upload flyer'}</button>` : ''}</span></div>`;
     }).join('') + '</div>';
     return h;
   }
