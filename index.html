@@ -70,7 +70,7 @@ input:focus,select:focus{border-color:var(--focus)}
 .tab .dot{width:10px;height:10px;border-radius:50%;background:var(--c)}
 .tab .n{font:600 12px var(--body);letter-spacing:0;background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:0 7px;color:var(--muted)}
 .tab[aria-current="page"]{color:var(--fg);border-bottom-color:var(--c,var(--fg))}
-.tab[aria-current="page"][data-tab="all"],.tab[aria-current="page"][data-tab="calendar"]{border-bottom-color:var(--fg)}
+.tab[aria-current="page"][data-tab="all"],.tab[aria-current="page"][data-tab="calendar"],.tab[aria-current="page"][data-tab="flyers"]{border-bottom-color:var(--fg)}
 .toolbar{display:flex;flex-wrap:wrap;align-items:center;gap:10px 22px;padding:16px 0 8px}
 .toolbar .sp{flex:1}
 .check{display:flex;align-items:center;gap:8px;cursor:pointer;user-select:none}
@@ -104,6 +104,24 @@ input:focus,select:focus{border-color:var(--focus)}
 .pill.red{background:var(--red);color:#fff;font-weight:700}
 .card.todo,.row.todo{box-shadow:inset 5px 0 0 var(--red)}
 .cal-ev.todo{box-shadow:inset 0 0 0 2px var(--red)}
+.flyer{margin-top:12px;padding-top:10px;border-top:1px solid var(--line,#edebd1)}
+.flyer h4{margin:0 0 8px;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.flyer-in{display:flex;gap:14px;align-items:flex-start;flex-wrap:wrap}
+.fthumb{display:block;width:120px;max-height:160px;object-fit:cover;object-position:top;border:1px solid #cad2d8;border-radius:4px;background:#fff}
+.fpdf{display:flex;align-items:center;justify-content:center;width:120px;height:90px;border:1px solid #cad2d8;border-radius:4px;background:var(--sand,#edebd1);font-family:var(--display);font-weight:700;color:var(--accent);text-decoration:none;font-size:22px}
+.flyer-act{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.flyer-act a.btn{text-decoration:none;display:inline-flex;align-items:center}
+.flyer-act a.btn:not(.primary){color:var(--fg)}
+.fgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px}
+.fcard{background:var(--surface,#fff);border:1px solid #cad2d8;border-radius:6px;padding:14px}
+.fcard .fthumb{width:100%;max-height:none;height:auto}
+.fcard .fpdf{width:100%;height:140px}
+.fcard .flyer{border-top:0;margin-top:10px;padding-top:0}
+.fcard .flyer h4{display:none}
+.fcard .flyer-in{flex-direction:column;gap:10px}
+.fhead{display:flex;gap:10px;align-items:center}
+.fhead b{display:block;font-size:16px}
+.fhead small{color:var(--muted)}
 .tile.tbd{font-size:13px}
 .pill.tent{background:var(--surface);color:var(--muted);border:1px dashed var(--muted)}
 .pill.full{background:var(--surface);color:var(--muted);border:1px solid var(--line)}
@@ -238,6 +256,7 @@ input:focus,select:focus{border-color:var(--focus)}
 <div class="tabs-bar"><nav class="tabs" aria-label="Sections">
   <button class="tab" data-action="tab" data-tab="all">All events <span class="n" data-n="all"></span></button>
   <button class="tab" data-action="tab" data-tab="calendar">Calendar</button>
+  <button class="tab" data-action="tab" data-tab="flyers">Flyers <span class="n" data-n="flyers"></span></button>
   <button class="tab c-htc" data-action="tab" data-tab="htc"><i class="dot"></i>#HowToCollege <span class="n" data-n="htc"></span></button>
   <button class="tab c-cohort" data-action="tab" data-tab="cohort"><i class="dot"></i>Cohort Events <span class="n" data-n="cohort"></span></button>
   <button class="tab c-meetgo" data-action="tab" data-tab="meetgo"><i class="dot"></i>Meet &amp; Go's <span class="n" data-n="meetgo"></span></button>
@@ -284,6 +303,7 @@ input:focus,select:focus{border-color:var(--focus)}
     <div id="s-body"></div>
   </div>
 </div>
+<input type="file" id="flyer-input" accept="image/png,image/jpeg,image/webp,image/gif,application/pdf" hidden>
 <div class="modal" id="pmodal" hidden>
   <div class="panel" role="dialog" aria-modal="true" aria-labelledby="p-title">
     <h2 id="p-title">Manage PALs</h2>
@@ -317,7 +337,7 @@ try {
 
 (() => {
   const COMMITTEES = { htc: '#HowToCollege', cohort: 'Cohort Events', meetgo: "Meet & Go's" };
-  const TABS = ['all', 'calendar', 'htc', 'cohort', 'meetgo'];
+  const TABS = ['all', 'calendar', 'flyers', 'htc', 'cohort', 'meetgo'];
   const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
   const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
   const MONTHS_LONG = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
@@ -349,7 +369,7 @@ try {
   const state = { db: null, dbChecked: false, canWrite: null, events: {}, signups: {}, pals: {}, ready: { events: false, signups: false } };
   const nowD = new Date();
   const view = { tab: 'all', showPast: store.get('pal-past') === '1', mine: false, focusId: null, cal: { y: nowD.getFullYear(), m: nowD.getMonth() }, calSel: today() };
-  let armed = null, armedTimer = null, editingId = null, raf = false, toastTimer = null, flow = null;
+  let flyerBusy = null, flyerTarget = null, armed = null, armedTimer = null, editingId = null, raf = false, toastTimer = null, flow = null;
 
   const who = $('#who');
   who.value = store.get('pal-name') || '';
@@ -403,6 +423,73 @@ try {
   };
   const needsPeople = (ev, people) => { const past = ev.date && ev.date < today(); return !past && (!people.some(p => p.role === 'lead') || palState(ev, people, past).needs); };
   const openTxt = ps => ps.open == null ? 'Needs PALs' : ps.open + ' PAL spot' + (ps.open === 1 ? '' : 's') + ' open';
+
+  /* ---------- flyers ---------- */
+  const isImg = f => /^image\//.test((f && f.type) || '');
+  function flyerHTML(ev, canW) {
+    const f = ev.flyer, busy = flyerBusy === ev.id;
+    if (!f) return `<div class="flyer"><h4>Flyer</h4><p class="empty-roster" style="margin:0 0 8px">No flyer yet.</p>${canW ? `<button class="btn" data-action="flyer-pick" data-id="${esc(ev.id)}"${busy ? ' disabled' : ''}>${busy ? 'Uploading…' : 'Upload flyer'}</button>` : ''}</div>`;
+    const thumb = isImg(f) ? `<a href="${esc(f.url)}" target="_blank" rel="noopener"><img class="fthumb" src="${esc(f.url)}" alt="Flyer for ${esc(ev.title)}" loading="lazy"></a>` : `<a class="fpdf" href="${esc(f.url)}" target="_blank" rel="noopener">PDF</a>`;
+    const dl = f.url + (f.url.includes('?') ? '&' : '?') + 'download=' + encodeURIComponent(f.name || 'flyer');
+    return `<div class="flyer"><h4>Flyer</h4><div class="flyer-in">${thumb}<div class="flyer-act">
+      <a class="btn primary" href="${esc(f.url)}" target="_blank" rel="noopener">View</a>
+      <a class="btn" href="${esc(dl)}" download="${esc(f.name || 'flyer')}">Download</a>
+      <button class="btn quiet" data-action="flyer-copy" data-id="${esc(ev.id)}">Copy link</button>
+      ${canW ? `<button class="btn quiet" data-action="flyer-pick" data-id="${esc(ev.id)}"${busy ? ' disabled' : ''}>${busy ? 'Uploading…' : 'Replace'}</button>
+      <button class="btn quiet" data-action="flyer-rm" data-id="${esc(ev.id)}">${armed === 'fl:' + ev.id ? 'Tap again to remove' : 'Remove'}</button>` : ''}
+    </div></div></div>`;
+  }
+  function flyersHTML(list, canW) {
+    const t = today();
+    const evs = list.filter(e => view.showPast || !e.date || e.date >= t);
+    const has = evs.filter(e => e.flyer), no = evs.filter(e => !e.flyer);
+    let h = '';
+    if (has.length) h += '<div class="fgrid">' + has.map(ev => {
+      const when = ev.date ? longDate(ev.date) + (ev.start ? ' · ' + range(ev.start, ev.end) : '') : 'Date to be set';
+      return `<article class="fcard c-${esc(ev.committee)}"><div class="fhead">${tile(ev)}<div><b>${esc(ev.title)}</b><small>${esc(when)}</small></div></div>${flyerHTML(ev, canW)}</article>`;
+    }).join('') + '</div>';
+    else h += '<div class="empty"><b>No flyers yet</b>Open an event and tap "Upload flyer", or use the buttons below.</div>';
+    if (no.length) h += `<h2 class="month">Still need a flyer (${no.length})</h2><div class="list">` + no.map(ev => {
+      const when = ev.date ? longDate(ev.date) : 'Date to be set';
+      return `<div class="row c-${esc(ev.committee)}" style="cursor:default">${tile(ev)}<span><span class="row-title">${esc(ev.title)}${chip(ev.committee)}</span><span class="row-meta">${esc(when)}</span></span><span class="row-cov">${canW ? `<button class="btn" data-action="flyer-pick" data-id="${esc(ev.id)}"${flyerBusy === ev.id ? ' disabled' : ''}>${flyerBusy === ev.id ? 'Uploading…' : 'Upload flyer'}</button>` : ''}</span></div>`;
+    }).join('') + '</div>';
+    return h;
+  }
+  const FLYER_OK = /^(image\/(png|jpe?g|webp|gif)|application\/pdf)$/;
+  async function uploadFlyer(id, file) {
+    const ev = state.events[id]; if (!ev || !state.db || !file) return;
+    if (!FLYER_OK.test(file.type)) { toast('Please choose an image (PNG, JPG, WebP) or a PDF.'); return; }
+    if (file.size > 10 * 1024 * 1024) { toast('That file is over 10 MB. Try a smaller one.'); return; }
+    flyerBusy = id; schedule();
+    try {
+      const safe = file.name.replace(/[^\w.\-]+/g, '_').slice(-60) || 'flyer';
+      const path = id + '/' + Date.now().toString(36) + '-' + safe;
+      const up = await fb.sb.storage.from('flyers').upload(path, file, { contentType: file.type, upsert: true });
+      if (up.error) throw up.error;
+      const url = fb.sb.storage.from('flyers').getPublicUrl(path).data.publicUrl;
+      const old = ev.flyer;
+      const { _id, id: _i, ...rest } = state.events[id];
+      await state.db.collection('events').doc(id).set({ ...rest, flyer: { url, path, name: file.name, type: file.type, by: currentName() || '', at: Date.now() } });
+      if (old && old.path) { try { await fb.sb.storage.from('flyers').remove([old.path]); } catch (_) {} }
+      toast('Flyer uploaded.');
+    } catch (e) {
+      const m = String((e && (e.message || e.error)) || '');
+      toast(/bucket|not found|row-level|policy|403|404/i.test(m) ? 'Flyer uploads need one more setup step. See SETUP.md (Flyers).' : "Couldn't upload the flyer. Try again.");
+    } finally { flyerBusy = null; schedule(); }
+  }
+  async function removeFlyer(id) {
+    const ev = state.events[id]; if (!ev || !ev.flyer || !state.db) return;
+    try {
+      const { _id, id: _i, flyer, ...rest } = ev;
+      await state.db.collection('events').doc(id).set(rest);
+      if (flyer.path) { try { await fb.sb.storage.from('flyers').remove([flyer.path]); } catch (_) {} }
+      toast('Flyer removed.');
+    } catch (e) { writeFail(e); }
+  }
+  async function copyFlyer(id) {
+    const f = state.events[id] && state.events[id].flyer; if (!f) return;
+    try { await navigator.clipboard.writeText(f.url); toast('Flyer link copied.'); } catch (_) { toast('Press and hold the View button to copy the link.'); }
+  }
 
   function coverage(ev, people, me, past) {
     const leads = people.filter(p => p.role === 'lead'), pals = people.filter(p => p.role !== 'lead');
@@ -497,7 +584,7 @@ try {
     const flagBtn = canW ? `<div class="btns" style="margin-top:10px"><button class="btn quiet" data-action="flag" data-id="${esc(ev.id)}">${ev.draft ? 'Mark as done editing' : 'Flag as unfinished'}</button></div>` : '';
     return `<article class="card c-${esc(ev.committee)}${past ? ' past' : ''}${isDraft(ev) ? ' todo' : ''}" id="ev-${esc(ev.id)}">
       <div class="card-head">${tile(ev)}<h3>${esc(ev.title)}${tent(ev)}</h3></div>
-      <dl class="facts">${facts}</dl>${roster}${signup}${flagBtn}
+      <dl class="facts">${facts}</dl>${roster}${signup}${flyerHTML(ev, canW)}${flagBtn}
       <div class="card-foot"><button class="link" data-action="edit" data-id="${esc(ev.id)}"${canW ? '' : ' disabled'}>Edit event</button></div>
     </article>`;
   }
@@ -562,7 +649,7 @@ try {
     document.querySelectorAll('.tab').forEach(b => b.setAttribute('aria-current', b.dataset.tab === view.tab ? 'page' : 'false'));
     document.querySelectorAll('[data-n]').forEach(n => {
       const k = n.dataset.n;
-      const c = k === 'all' ? up.length : up.filter(e => e.committee === k).length;
+      const c = k === 'all' ? up.length : k === 'flyers' ? up.filter(e => e.flyer).length : up.filter(e => e.committee === k).length;
       n.textContent = c; n.hidden = !state.ready.events;
     });
     const live = $('#live');
@@ -576,11 +663,14 @@ try {
     $('#banners').innerHTML = banners;
 
     const isCal = view.tab === 'calendar';
-    const scoped = view.tab === 'all' || isCal ? list : list.filter(e => e.committee === view.tab);
+    const isFly = view.tab === 'flyers';
+    const scoped = view.tab === 'all' || isCal || isFly ? list : list.filter(e => e.committee === view.tab);
     const pastCount = scoped.filter(e => (e.date && e.date < t)).length;
     const todoCount = scoped.filter(isDraft).length, needCount = scoped.filter(e => needsPeople(e, by[e.id] || [])).length;
     const canW = state.canWrite !== false && !!state.db;
-    $('#toolbar').innerHTML = isCal
+    $('#toolbar').innerHTML = isFly
+      ? `<label class="check"><input type="checkbox" id="t-past" data-toggle="past"${view.showPast ? ' checked' : ''}> Show past events</label><span class="sp"></span>`
+      : isCal
       ? `<span class="sp"></span><button class="btn primary" data-action="add"${canW ? '' : ' disabled'}>Add event</button>`
       : `<label class="check"><input type="checkbox" id="t-past" data-toggle="past"${view.showPast ? ' checked' : ''}> Show past events${pastCount ? ' (' + pastCount + ')' : ''}</label>
       <label class="check"><input type="checkbox" data-toggle="need"${view.need ? ' checked' : ''}> <span style="color:var(--warn-fg);font-weight:700;background:var(--warn-bg);padding:1px 6px;border-radius:3px">Needs PALs${needCount ? ' (' + needCount + ')' : ''}</span></label>
@@ -600,6 +690,8 @@ try {
       html = '<div class="empty"><b>Loading the schedule</b>Pulling the latest sign-ups.</div>';
     } else if (!list.length) {
       html = '<div class="empty"><b>No events yet</b>Use "Add event" to put the first one on the schedule.' + (Object.keys((fb.SEED && fb.SEED.events) || {}).length ? '<p><button class="btn primary" data-action="seed">Load the Fall 2026 schedule</button></p>' : '') + '</div>';
+    } else if (isFly) {
+      html = flyersHTML(list, canW);
     } else if (isCal) {
       html = calHTML(list, by, me);
     } else if (!items.length) {
@@ -804,6 +896,7 @@ try {
       tentative: F('f-tent').checked, draft: F('f-draft').checked
     };
     if (!data.title) return;
+    if (editingId && state.events[editingId] && state.events[editingId].flyer) data.flyer = state.events[editingId].flyer;
     const btn = F('f-save'); btn.disabled = true;
     try {
       if (editingId) await state.db.collection('events').doc(editingId).set(data);
@@ -820,7 +913,9 @@ try {
     try {
       const mine = Object.values(state.signups).filter(s => s.eventId === id);
       for (const s of mine) await state.db.collection('signups').doc(s._id).delete();
+      const fl = state.events[id] && state.events[id].flyer;
       await state.db.collection('events').doc(id).delete();
+      if (fl && fl.path) { try { await fb.sb.storage.from('flyers').remove([fl.path]); } catch (_) {} }
       closeForm(); toast('Event deleted.');
     } catch (e) { writeFail(e); } finally { b.disabled = false; }
   }
@@ -1132,6 +1227,13 @@ try {
         else { armed = sid; clearTimeout(armedTimer); armedTimer = setTimeout(() => { armed = null; schedule(); }, 3500); schedule(); }
       }
       else if (a === 'flag') toggleFlag(el.dataset.id);
+      else if (a === 'flyer-pick') { flyerTarget = el.dataset.id; const fi = $('#flyer-input'); fi.value = ''; fi.click(); }
+      else if (a === 'flyer-copy') copyFlyer(el.dataset.id);
+      else if (a === 'flyer-rm') {
+        const k = 'fl:' + el.dataset.id;
+        if (armed === k) { clearTimeout(armedTimer); armed = null; removeFlyer(el.dataset.id); }
+        else { armed = k; clearTimeout(armedTimer); armedTimer = setTimeout(() => { armed = null; schedule(); }, 3500); schedule(); }
+      }
       else if (a === 'add') openForm(null, el.dataset.date);
       else if (a === 'edit') openForm(el.dataset.id);
       else if (a === 'close') closeForm();
@@ -1176,6 +1278,7 @@ try {
   });
   $('#modal').addEventListener('mousedown', e => { if (e.target.id === 'modal') closeForm(); });
   $('#smodal').addEventListener('mousedown', e => { if (e.target.id === 'smodal') closeFlow(); });
+  $('#flyer-input').addEventListener('change', e => { const f = e.target.files && e.target.files[0]; if (f && flyerTarget) uploadFlyer(flyerTarget, f); });
   window.addEventListener('hashchange', () => { const t = location.hash.slice(1); if (TABS.includes(t) && t !== view.tab) { view.tab = t; render(); } });
   view.tab = TABS.includes(location.hash.slice(1)) ? location.hash.slice(1) : 'all';
 

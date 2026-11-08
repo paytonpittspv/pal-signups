@@ -36,3 +36,7 @@ The folder now also includes `favicon-32.png`, `favicon-192.png` and `apple-touc
 3. **Settings > Pages**. Under Source choose **Deploy from a branch**, branch **main**, folder **/ (root)**, and Save. After about a minute the page shows your link: `https://YOUR-USERNAME.github.io/pal-signups/`
 4. To update later: **Add file > Upload files**, drop the new files in, and commit. Same names replace the old ones.
 You can delete `seed.js`, `setup.sql` and `SETUP.md` from the repo once the schedule is loaded. The page works without them.
+
+## Flyers (one extra step)
+
+Event flyer uploads need a storage bucket. In Supabase, open **SQL Editor > New query**, paste everything from `flyers.sql`, and click **Run**. You should see "Success". Until you do this, the Flyers tab works but uploads will say they need one more setup step.
