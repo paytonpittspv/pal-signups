@@ -345,7 +345,7 @@ input:focus,select:focus{border-color:var(--focus)}
   </div>
 </div>
 <div class="toast" id="toast" role="status" hidden></div>
-<p style="text-align:center;color:#7e96a0;font-size:12px;margin:24px 0 0">App version: Nov 7, 9:00 PM</p>
+<p style="text-align:center;color:#7e96a0;font-size:12px;margin:24px 0 0">App version: Nov 8, 11:30 AM</p>
 
 <script type="module">
 const diag = (window.__diag = []);
@@ -402,7 +402,7 @@ try {
   let pArmed = null, pArmedTimer = null;
   const state = { db: null, dbChecked: false, canWrite: null, events: {}, signups: {}, pals: {}, ready: { events: false, signups: false } };
   const nowD = new Date();
-  const view = { tab: 'all', com: 'all', showPast: store.get('pal-past') === '1', mine: false, focusId: null, openId: null, cal: { y: nowD.getFullYear(), m: nowD.getMonth() }, calSel: today() };
+  const view = { tab: 'all', com: 'all', showPast: store.get('pal-past') === '1', mine: false, focusId: null, openIds: {}, cal: { y: nowD.getFullYear(), m: nowD.getMonth() }, calSel: today() };
   let flyerBusy = null, flyerTarget = null, armed = null, armedTimer = null, editingId = null, raf = false, toastTimer = null, flow = null;
 
   const who = $('#who');
@@ -546,7 +546,8 @@ try {
     return `<span class="row-cov">${top}${sub || openPill ? `<span class="cov-sub">${sub}${full}${openPill}</span>` : ''}${isIn(people, me) ? '<span class="pill me">You\'re in</span>' : ''}</span>`;
   }
 
-  const entryHTML = (ev, people, me) => isMobile() && view.openId === ev.id ? cardHTML(ev, people, me) : rowHTML(ev, people, me);
+  function rowsMode() { return view.com === 'all' || isMobile(); }
+  const entryHTML = (ev, people, me) => view.openIds[ev.id] ? cardHTML(ev, people, me) : rowHTML(ev, people, me);
   function rowHTML(ev, people, me) {
     const past = ev.date < today();
     const meta = [range(ev.start, ev.end), ev.palStart ? 'PAL time ' + range(ev.palStart, ev.palEnd) : '', ev.location].filter(Boolean).join(' · ');
@@ -623,7 +624,7 @@ try {
         signup = `<div class="signup"><div class="btns">${btn('pal', true)}${btn('lead', false)}</div></div>`;
       }
     }
-    const tools = `<div class="tools">${flyerLine(ev, canW)}<span class="sp"></span>${canW ? `<button class="link" data-action="flag" data-id="${esc(ev.id)}">${ev.draft ? 'Mark as done' : 'Flag unfinished'}</button>` : ''}<button class="link" data-action="edit" data-id="${esc(ev.id)}"${canW ? '' : ' disabled'}>Edit event</button><button class="link m-only" data-action="collapse">Close</button></div>`;
+    const tools = `<div class="tools">${flyerLine(ev, canW)}<span class="sp"></span>${canW ? `<button class="link" data-action="flag" data-id="${esc(ev.id)}">${ev.draft ? 'Mark as done' : 'Flag unfinished'}</button>` : ''}<button class="link" data-action="edit" data-id="${esc(ev.id)}"${canW ? '' : ' disabled'}>Edit event</button>${rowsMode() ? `<button class="link" data-action="collapse" data-id="${esc(ev.id)}">Close</button>` : ''}</div>`;
     return `<article class="card c-${esc(ev.committee)}${past ? ' past' : ''}${isDraft(ev) ? ' todo' : ''}" id="ev-${esc(ev.id)}">
       <div class="card-head">${tile(ev)}<h3>${esc(ev.title)}${tent(ev)}</h3></div>
       <dl class="facts">${facts}</dl>${roster}${signup}${tools}
@@ -749,8 +750,9 @@ try {
         ? '<div class="empty"><b>Nothing on your list</b>Sign up for an event and it will show up here.</div>'
         : '<div class="empty"><b>Nothing coming up</b>Turn on "Show past events" to see earlier ones, or add a new event.</div>';
     } else if (view.com === 'all' || isMobile()) {
+      html = '<p class="hint" style="margin:0 0 6px;color:var(--muted);font-size:14px">Tap any event to open it, sign up, upload a flyer or edit it, whatever the committee.</p>';
       let cur = '';
-      html = '<div class="list">';
+      html += '<div class="list">';
       for (const ev of items) {
         const d = dparts(ev.date), key = ev.date ? d.ml + ' ' + d.y : 'Date to be set';
         if (key !== cur) { cur = key; html += `</div><h2 class="month">${esc(key)}</h2><div class="list">`; }
@@ -1278,19 +1280,26 @@ try {
       else if (a === 'com') setCom(el.dataset.com);
       else if (a === 'open') {
         const ev = state.events[el.dataset.id]; if (!ev) return;
-        if (isMobile()) {
-          const oid = el.dataset.id;
-          view.openId = el.dataset.cal ? oid : (view.openId === oid ? null : oid);
-          if (ev.date) view.calSel = ev.date;
+        const oid = el.dataset.id;
+        if (el.dataset.cal && isMobile()) {
+          view.openIds[oid] = true; if (ev.date) view.calSel = ev.date;
           view.showPast = view.showPast || !!(ev.date && ev.date < today());
-          render();
-          const c = document.getElementById('ev-' + oid);
-          if (c && view.openId) c.scrollIntoView({ block: 'start' }); else if (el.dataset.cal) jumpAgenda();
+          render(); const c = document.getElementById('ev-' + oid); if (c) c.scrollIntoView({ block: 'start' }); else jumpAgenda();
           return;
         }
-        view.focusId = el.dataset.id; view.showPast = view.showPast || !!(ev.date && ev.date < today()); view.com = ev.committee; setTab('all');
+        if (el.dataset.cal) {
+          view.openIds[oid] = true; view.showPast = view.showPast || !!(ev.date && ev.date < today());
+          if (view.com !== 'all' && !inCom(ev, view.com)) view.com = 'all';
+          view.tab = 'all'; if (location.hash.slice(1) !== hashOf()) location.hash = hashOf();
+          render(); const c = document.getElementById('ev-' + oid); if (c) c.scrollIntoView({ block: 'start' });
+          return;
+        }
+        if (view.openIds[oid]) delete view.openIds[oid]; else view.openIds[oid] = true;
+        view.showPast = view.showPast || !!(ev.date && ev.date < today());
+        render();
+        const c = document.getElementById('ev-' + oid); if (c && view.openIds[oid]) c.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
       }
-      else if (a === 'collapse') { view.openId = null; render(); }
+      else if (a === 'collapse') { delete view.openIds[el.dataset.id]; render(); }
       else if (a === 'signup') openFlow(el.dataset.id, el.dataset.role);
       else if (a === 'avail') openAvail(el.dataset.id);
       else if (a === 'flow-confirm') flowConfirm();
@@ -1353,7 +1362,7 @@ try {
   $('#modal').addEventListener('mousedown', e => { if (e.target.id === 'modal') closeForm(); });
   $('#smodal').addEventListener('mousedown', e => { if (e.target.id === 'smodal') closeFlow(); });
   $('#flyer-input').addEventListener('change', e => { const f = e.target.files && e.target.files[0]; if (f && flyerTarget) uploadFlyer(flyerTarget, f); });
-  if (window.matchMedia) { const mq = window.matchMedia('(max-width:640px)'); (mq.addEventListener ? mq.addEventListener.bind(mq, 'change') : mq.addListener.bind(mq))(() => { view.openId = null; render(); }); }
+  if (window.matchMedia) { const mq = window.matchMedia('(max-width:640px)'); (mq.addEventListener ? mq.addEventListener.bind(mq, 'change') : mq.addListener.bind(mq))(() => { render(); }); }
   window.addEventListener('hashchange', () => { const a = view.tab + '|' + view.com; applyHash(); if (a !== view.tab + '|' + view.com) render(); });
   applyHash();
 
