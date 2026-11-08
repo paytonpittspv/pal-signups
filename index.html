@@ -9,7 +9,7 @@
 /* USF palette: Storm blue #HowToCollege, USF Green Cohort Events, USF Gold Meet & Go's. */
 :root{
   --bg:#ffffff; --surface:#f7f6ea; --line:#e0ddc0; --fg:#303434; --muted:#466069;
-  --storm:#006484; --storm-t:#006484; --green:#006747; --green-t:#005432; --gold:#cfc493; --gold-t:#6e6320;
+  --storm:#006484; --storm-t:#006484; --green:#006747; --green-t:#005432; --gold:#cfc493; --gold-t:#6e6320; --apple:#9ccb3b; --apple-t:#4a6b12;
   --accent:#006747; --accent-h:#005432; --accent-t:#005432; --on:#ffffff;
   --red:#c8102e; --lemon:#dbe442; --ink:#303434; --warn-bg:#f1f4b4; --warn-fg:#3d4a00; --focus:#006484; --scrim:rgba(48,52,52,.6);
   color-scheme:light;
@@ -27,6 +27,7 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 .c-htc{--c:var(--storm);--ct:var(--storm-t)}
 .c-cohort{--c:var(--green);--ct:var(--green-t)}
 .c-meetgo{--c:var(--gold);--ct:var(--gold-t);--c-on:#303434}
+.c-wow{--c:var(--apple);--ct:var(--apple-t);--c-on:#303434}
 .wrap{max-width:1040px;margin:0 auto}
 button,input,select,textarea{font:inherit;color:inherit}
 button{cursor:pointer}
@@ -214,7 +215,7 @@ input:focus,select:focus{border-color:var(--focus)}
 </head><body>
 <div class="wrap">
   <header>
-    <div class="stripe" aria-hidden="true"><i class="c-htc"></i><i class="c-cohort"></i><i class="c-meetgo"></i></div>
+    <div class="stripe" aria-hidden="true"><i class="c-htc"></i><i class="c-cohort"></i><i class="c-meetgo"></i><i class="c-wow"></i></div>
     <div class="top-in">
       <div class="t-title"><h1>PAL Event Sign-Ups</h1></div>
       <div class="menu-wrap">
@@ -233,6 +234,7 @@ input:focus,select:focus{border-color:var(--focus)}
             <label class="radio"><input type="radio" name="x-com" value="htc"> #HowToCollege</label>
             <label class="radio"><input type="radio" name="x-com" value="cohort"> Cohort Events</label>
             <label class="radio"><input type="radio" name="x-com" value="meetgo"> Meet &amp; Go's</label>
+            <label class="radio"><input type="radio" name="x-com" value="wow"> Week of Welcome (WOW), including WOW events from other committees</label>
           </fieldset>
           <p class="hint">Downloads a PDF report with each event and who is signed up.</p>
           <button class="btn primary" type="button" id="x-go" data-action="export">Download PDF report</button>
@@ -260,6 +262,7 @@ input:focus,select:focus{border-color:var(--focus)}
   <button class="tab c-htc" data-action="tab" data-tab="htc"><i class="dot"></i>#HowToCollege <span class="n" data-n="htc"></span></button>
   <button class="tab c-cohort" data-action="tab" data-tab="cohort"><i class="dot"></i>Cohort Events <span class="n" data-n="cohort"></span></button>
   <button class="tab c-meetgo" data-action="tab" data-tab="meetgo"><i class="dot"></i>Meet &amp; Go's <span class="n" data-n="meetgo"></span></button>
+  <button class="tab c-wow" data-action="tab" data-tab="wow"><i class="dot"></i>Week of Welcome (WOW) <span class="n" data-n="wow"></span></button>
 </nav></div>
 <div class="wrap">
   <div id="banners"></div>
@@ -274,7 +277,7 @@ input:focus,select:focus{border-color:var(--focus)}
       <div class="grid2">
         <label class="field full"><span>Event name</span><input id="f-title" required maxlength="80"></label>
         <label class="field full"><span>Committee</span>
-          <select id="f-committee"><option value="htc">#HowToCollege</option><option value="cohort">Cohort Events</option><option value="meetgo">Meet &amp; Go's</option></select></label>
+          <select id="f-committee"><option value="htc">#HowToCollege</option><option value="cohort">Cohort Events</option><option value="meetgo">Meet &amp; Go's</option><option value="wow">Week of Welcome (no committee)</option></select></label>
         <label class="field full"><span>Date (blank if not set yet)</span><input id="f-date" type="date"></label>
         <label class="field"><span>Event starts</span><input id="f-start" type="time"></label>
         <label class="field"><span>Event ends</span><input id="f-end" type="time"></label>
@@ -285,6 +288,7 @@ input:focus,select:focus{border-color:var(--focus)}
         <label class="field full"><span>Location</span><input id="f-location" maxlength="100"></label>
         <label class="field full"><span>Attire</span><input id="f-attire" maxlength="100"></label>
         <label class="field full"><span>Notes (optional)</span><input id="f-notes" maxlength="200"></label>
+        <label class="check full"><input type="checkbox" id="f-wow"> Also a Week of Welcome (WOW) event (shows on the WOW tab too)</label>
         <label class="check full"><input type="checkbox" id="f-tent"> Tentative, details may change</label>
         <label class="check full"><input type="checkbox" id="f-draft"> Flag in red: this event is still being edited</label>
       </div>
@@ -336,8 +340,9 @@ try {
 } catch (e) { fb.ok = false; diag.push("Supabase setup failed: " + e.message); }
 
 (() => {
-  const COMMITTEES = { htc: '#HowToCollege', cohort: 'Cohort Events', meetgo: "Meet & Go's" };
-  const TABS = ['all', 'calendar', 'flyers', 'htc', 'cohort', 'meetgo'];
+  const COMMITTEES = { htc: '#HowToCollege', cohort: 'Cohort Events', meetgo: "Meet & Go's", wow: 'Week of Welcome (WOW)' };
+  const inCom = (e, k) => k === 'wow' ? (e.committee === 'wow' || !!e.wow) : e.committee === k;
+  const TABS = ['all', 'calendar', 'flyers', 'htc', 'cohort', 'meetgo', 'wow'];
   const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
   const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
   const MONTHS_LONG = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
@@ -415,7 +420,7 @@ try {
   const missing = ev => [!ev.date && 'date', !ev.start && 'time', !ev.location && 'location'].filter(Boolean);
   const isDraft = ev => !!ev.draft || missing(ev).length > 0;
   const todoWhy = ev => ev.draft ? 'Still editing' : 'Needs ' + missing(ev).join(' + ');
-  const tent = ev => (ev.tentative ? ' <span class="pill tent">Tentative</span>' : '') + (isDraft(ev) ? ` <span class="pill red">${esc(todoWhy(ev))}</span>` : '');
+  const tent = ev => (ev.wow && ev.committee !== 'wow' ? ' <span class="chip c-wow" style="margin-left:4px">WOW</span>' : '') + (ev.tentative ? ' <span class="pill tent">Tentative</span>' : '') + (isDraft(ev) ? ` <span class="pill red">${esc(todoWhy(ev))}</span>` : '');
 
   const palState = (ev, people, past) => {
     const n = people.filter(p => p.role !== 'lead').length, cap = capOf(ev, 'pal'), fin = isFinite(cap);
@@ -649,7 +654,7 @@ try {
     document.querySelectorAll('.tab').forEach(b => b.setAttribute('aria-current', b.dataset.tab === view.tab ? 'page' : 'false'));
     document.querySelectorAll('[data-n]').forEach(n => {
       const k = n.dataset.n;
-      const c = k === 'all' ? up.length : k === 'flyers' ? up.filter(e => e.flyer).length : up.filter(e => e.committee === k).length;
+      const c = k === 'all' ? up.length : k === 'flyers' ? up.filter(e => e.flyer).length : up.filter(e => inCom(e, k)).length;
       n.textContent = c; n.hidden = !state.ready.events;
     });
     const live = $('#live');
@@ -664,7 +669,7 @@ try {
 
     const isCal = view.tab === 'calendar';
     const isFly = view.tab === 'flyers';
-    const scoped = view.tab === 'all' || isCal || isFly ? list : list.filter(e => e.committee === view.tab);
+    const scoped = view.tab === 'all' || isCal || isFly ? list : list.filter(e => inCom(e, view.tab));
     const pastCount = scoped.filter(e => (e.date && e.date < t)).length;
     const todoCount = scoped.filter(isDraft).length, needCount = scoped.filter(e => needsPeople(e, by[e.id] || [])).length;
     const canW = state.canWrite !== false && !!state.db;
@@ -878,6 +883,7 @@ try {
     F('f-notes').value = ev ? ev.notes || '' : '';
     F('f-tent').checked = ev ? !!ev.tentative : false;
     F('f-draft').checked = ev ? !!ev.draft : false;
+    F('f-wow').checked = ev ? !!ev.wow : false;
     const del = F('f-delete'); del.hidden = !ev; del.textContent = 'Delete event'; del.dataset.armed = '';
     $('#modal').hidden = false;
     F('f-title').focus();
@@ -893,7 +899,7 @@ try {
       start: F('f-start').value, end: F('f-end').value, palStart: F('f-pstart').value, palEnd: F('f-pend').value,
       maxLeads: capVal(F('f-maxleads').value), maxPals: capVal(F('f-maxpals').value),
       location: F('f-location').value.trim(), attire: F('f-attire').value.trim(), notes: F('f-notes').value.trim(),
-      tentative: F('f-tent').checked, draft: F('f-draft').checked
+      tentative: F('f-tent').checked, draft: F('f-draft').checked, wow: F('f-wow').checked
     };
     if (!data.title) return;
     if (editingId && state.events[editingId] && state.events[editingId].flyer) data.flyer = state.events[editingId].flyer;
@@ -1005,12 +1011,12 @@ try {
     return lines.length ? lines : [''];
   }
   const PAL = { green: '#006747', evergreen: '#005432', gold: '#CFC493', sand: '#EDEBD1', storm: '#006484', silver: '#CAD2D8', slate: '#466069', ink: '#303434', lemon: '#DBE442', white: '#FFFFFF', red: '#C8102E' };
-  const COM_COLOR = { htc: PAL.storm, cohort: PAL.green, meetgo: PAL.gold };
-  const COM_INK = { htc: PAL.white, cohort: PAL.white, meetgo: PAL.ink };
+  const COM_COLOR = { htc: PAL.storm, cohort: PAL.green, meetgo: PAL.gold, wow: '#9CCB3B' };
+  const COM_INK = { htc: PAL.white, cohort: PAL.white, meetgo: PAL.ink, wow: PAL.ink };
 
   function makeReportPDF(scope, com) {
     const { list, by } = compute(), t = today();
-    const evs = list.filter(e => (com === 'all' || e.committee === com) && (scope === 'all' || (!e.date || e.date >= t)));
+    const evs = list.filter(e => (com === 'all' || inCom(e, com)) && (scope === 'all' || (!e.date || e.date >= t)));
     const W = 612, H = 792, M = 40, CW = 532, BOTTOM = H - 52;
     const pages = []; let cur = null, y = 0;
     const rect = (x, top, w, h, fill) => cur.push(`${rgbOf(fill)} rg ${x.toFixed(2)} ${(H - top - h).toFixed(2)} ${w.toFixed(2)} ${h.toFixed(2)} re f`);
@@ -1080,7 +1086,7 @@ try {
     for (const ev of evs) {
       const people = by[ev.id] || [], leads = people.filter(p => p.role === 'lead'), pals = people.filter(p => p.role !== 'lead');
       const past = (ev.date && ev.date < t), d = dparts(ev.date), monthKey = ev.date ? d.ml + ' ' + d.y : 'Date to be set';
-      const pillTxt = (COMMITTEES[ev.committee] || ev.committee), pillW = tw(pillTxt, 7.5, 'b') + 14;
+      const pillTxt = (COMMITTEES[ev.committee] || ev.committee) + (ev.wow && ev.committee !== 'wow' ? '  +  WOW' : ''), pillW = tw(pillTxt, 7.5, 'b') + 14;
       const redW = isDraft(ev) ? tw(todoWhy(ev).toUpperCase(), 7.5, 'b') + 18 : 0;
       const titleLines = wrapText(ev.title, cWid - pillW - redW - 10, 13, 'b');
       const meta = [ev.tentative ? 'TENTATIVE' : '', range(ev.start, ev.end), ev.palStart ? 'PAL time ' + range(ev.palStart, ev.palEnd) : '', ev.location].filter(Boolean).join('  ·  ');
