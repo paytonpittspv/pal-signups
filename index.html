@@ -123,6 +123,25 @@ input:focus,select:focus{border-color:var(--focus)}
 .fhead{display:flex;gap:10px;align-items:center}
 .fhead b{display:block;font-size:16px}
 .fhead small{color:var(--muted)}
+.comrow{display:flex;gap:8px;overflow-x:auto;padding:10px 0 2px;scrollbar-width:none}
+.comrow::-webkit-scrollbar{display:none}
+.cchip{flex:none;display:inline-flex;align-items:center;gap:7px;background:var(--bg);border:1px solid var(--line);border-radius:999px;padding:5px 12px;font:600 13px var(--body);color:var(--muted);white-space:nowrap}
+.cchip i{width:9px;height:9px;border-radius:50%;background:var(--c,var(--muted))}
+.cchip .n{font-weight:600;font-size:12px;opacity:.8}
+.cchip[aria-pressed="true"]{background:var(--fg);border-color:var(--fg);color:#fff}
+.cchip[aria-pressed="true"] i{box-shadow:0 0 0 2px #fff}
+.card{gap:8px!important}
+.facts{gap:2px 14px!important}
+@media(max-width:640px){.tab{font-size:15px;padding:12px 8px 9px;gap:5px}.tabs{gap:0}}
+.card>.roster{display:block}
+.rosters{display:grid;grid-template-columns:1fr 1fr;gap:8px 18px}
+@media(max-width:640px){.rosters{grid-template-columns:1fr}}
+.tools{display:flex;flex-wrap:wrap;align-items:center;gap:2px 14px;border-top:1px solid var(--line);padding-top:6px}
+.tools .link,.tools a.link{font-size:13px;padding:3px 0;color:var(--muted);text-decoration:underline;background:none;border:0}
+.tools .tl{font:600 11px var(--display);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.tools img.tt{width:28px;height:28px;object-fit:cover;object-position:top;border-radius:3px;border:1px solid #cad2d8;display:block}
+.tools .pdft{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:3px;border:1px solid #cad2d8;background:var(--sand,#edebd1);font:700 10px var(--display);color:var(--accent);text-decoration:none}
+.tools .sp{flex:1}
 .tile.tbd{font-size:13px}
 .pill.tent{background:var(--surface);color:var(--muted);border:1px dashed var(--muted)}
 .pill.full{background:var(--surface);color:var(--muted);border:1px solid var(--line)}
@@ -259,12 +278,9 @@ input:focus,select:focus{border-color:var(--focus)}
   <button class="tab" data-action="tab" data-tab="all">All events <span class="n" data-n="all"></span></button>
   <button class="tab" data-action="tab" data-tab="calendar">Calendar</button>
   <button class="tab" data-action="tab" data-tab="flyers">Flyers <span class="n" data-n="flyers"></span></button>
-  <button class="tab c-htc" data-action="tab" data-tab="htc"><i class="dot"></i>#HowToCollege <span class="n" data-n="htc"></span></button>
-  <button class="tab c-cohort" data-action="tab" data-tab="cohort"><i class="dot"></i>Cohort Events <span class="n" data-n="cohort"></span></button>
-  <button class="tab c-meetgo" data-action="tab" data-tab="meetgo"><i class="dot"></i>Meet &amp; Go's <span class="n" data-n="meetgo"></span></button>
-  <button class="tab c-wow" data-action="tab" data-tab="wow"><i class="dot"></i>Week of Welcome (WOW) <span class="n" data-n="wow"></span></button>
 </nav></div>
 <div class="wrap">
+  <div class="comrow" id="comrow" role="group" aria-label="Filter by committee"></div>
   <div id="banners"></div>
   <div class="toolbar" id="toolbar"></div>
   <main id="view" aria-live="polite"></main>
@@ -342,7 +358,8 @@ try {
 (() => {
   const COMMITTEES = { htc: '#HowToCollege', cohort: 'Cohort Events', meetgo: "Meet & Go's", wow: 'Week of Welcome (WOW)' };
   const inCom = (e, k) => k === 'wow' ? (e.committee === 'wow' || !!e.wow) : e.committee === k;
-  const TABS = ['all', 'calendar', 'flyers', 'htc', 'cohort', 'meetgo', 'wow'];
+  const TABS = ['all', 'calendar', 'flyers'];
+  const COMS = ['htc', 'cohort', 'meetgo', 'wow'];
   const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
   const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
   const MONTHS_LONG = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
@@ -373,7 +390,7 @@ try {
   let pArmed = null, pArmedTimer = null;
   const state = { db: null, dbChecked: false, canWrite: null, events: {}, signups: {}, pals: {}, ready: { events: false, signups: false } };
   const nowD = new Date();
-  const view = { tab: 'all', showPast: store.get('pal-past') === '1', mine: false, focusId: null, cal: { y: nowD.getFullYear(), m: nowD.getMonth() }, calSel: today() };
+  const view = { tab: 'all', com: 'all', showPast: store.get('pal-past') === '1', mine: false, focusId: null, cal: { y: nowD.getFullYear(), m: nowD.getMonth() }, calSel: today() };
   let flyerBusy = null, flyerTarget = null, armed = null, armedTimer = null, editingId = null, raf = false, toastTimer = null, flow = null;
 
   const who = $('#who');
@@ -443,6 +460,13 @@ try {
       ${canW ? `<button class="btn quiet" data-action="flyer-pick" data-id="${esc(ev.id)}"${busy ? ' disabled' : ''}>${busy ? 'Uploading…' : 'Replace'}</button>
       <button class="btn quiet" data-action="flyer-rm" data-id="${esc(ev.id)}">${armed === 'fl:' + ev.id ? 'Tap again to remove' : 'Remove'}</button>` : ''}
     </div></div></div>`;
+  }
+  function flyerLine(ev, canW) {
+    const f = ev.flyer, busy = flyerBusy === ev.id;
+    if (!f) return canW ? `<span class="tl">Flyer</span><button class="link" data-action="flyer-pick" data-id="${esc(ev.id)}"${busy ? ' disabled' : ''}>${busy ? 'Uploading…' : 'Upload'}</button>` : '';
+    const th = isImg(f) ? `<a href="${esc(f.url)}" target="_blank" rel="noopener"><img class="tt" src="${esc(f.url)}" alt="Flyer for ${esc(ev.title)}" loading="lazy"></a>` : `<a class="pdft" href="${esc(f.url)}" target="_blank" rel="noopener">PDF</a>`;
+    const dl = f.url + (f.url.includes('?') ? '&' : '?') + 'download=' + encodeURIComponent(f.name || 'flyer');
+    return `${th}<a class="link" href="${esc(f.url)}" target="_blank" rel="noopener">View</a><a class="link" href="${esc(dl)}" download="${esc(f.name || 'flyer')}">Download</a><button class="link" data-action="flyer-copy" data-id="${esc(ev.id)}">Copy link</button>${canW ? `<button class="link" data-action="flyer-pick" data-id="${esc(ev.id)}"${busy ? ' disabled' : ''}>${busy ? 'Uploading…' : 'Replace'}</button><button class="link" data-action="flyer-rm" data-id="${esc(ev.id)}">${armed === 'fl:' + ev.id ? 'Tap again to remove' : 'Remove'}</button>` : ''}`;
   }
   function flyersHTML(list, canW) {
     const t = today();
@@ -546,12 +570,12 @@ try {
     const admin = isAdmin();
     const rosterRemove = canW && (!past || admin);
     const fullPill = (n, cap) => !past && isFinite(cap) && n >= cap ? '<span class="pill full">Full</span>' : '';
-    const roster = `<div class="roster">
+    const roster = `<div class="rosters"><div class="roster">
         <h4>Lead PAL${capTxt(leads.length, leadCap)} ${fullPill(leads.length, leadCap)}</h4>${leads.length ? `<ul class="chips">${chipsHTML(leads, me, rosterRemove, admin)}</ul>` : `<p class="empty-roster">${past ? 'None listed.' : 'Nobody yet. This event needs a lead.'}</p>`}
       </div>
       <div class="roster">
         <h4>PALs${capTxt(pals.length, palCap)} ${fullPill(pals.length, palCap)}${palState(ev, people, past).needs ? ` <span class="pill warn">${openTxt(palState(ev, people, past))}</span>` : ''}</h4>${pals.length ? `<ul class="chips">${chipsHTML(pals, me, rosterRemove, admin)}</ul>` : `<p class="empty-roster">${past ? 'None listed.' : 'Nobody yet.'}</p>`}
-      </div>`;
+      </div></div>`;
     let signup = '';
     if (admin) {
       const d = adm[ev.id] || {}, onIt = new Set(people.map(p => slug(p.name)));
@@ -586,11 +610,10 @@ try {
         signup = `<div class="signup"><div class="btns">${btn('pal', true)}${btn('lead', false)}</div></div>`;
       }
     }
-    const flagBtn = canW ? `<div class="btns" style="margin-top:10px"><button class="btn quiet" data-action="flag" data-id="${esc(ev.id)}">${ev.draft ? 'Mark as done editing' : 'Flag as unfinished'}</button></div>` : '';
+    const tools = `<div class="tools">${flyerLine(ev, canW)}<span class="sp"></span>${canW ? `<button class="link" data-action="flag" data-id="${esc(ev.id)}">${ev.draft ? 'Mark as done' : 'Flag unfinished'}</button>` : ''}<button class="link" data-action="edit" data-id="${esc(ev.id)}"${canW ? '' : ' disabled'}>Edit event</button></div>`;
     return `<article class="card c-${esc(ev.committee)}${past ? ' past' : ''}${isDraft(ev) ? ' todo' : ''}" id="ev-${esc(ev.id)}">
       <div class="card-head">${tile(ev)}<h3>${esc(ev.title)}${tent(ev)}</h3></div>
-      <dl class="facts">${facts}</dl>${roster}${signup}${flyerHTML(ev, canW)}${flagBtn}
-      <div class="card-foot"><button class="link" data-action="edit" data-id="${esc(ev.id)}"${canW ? '' : ' disabled'}>Edit event</button></div>
+      <dl class="facts">${facts}</dl>${roster}${signup}${tools}
     </article>`;
   }
 
@@ -654,9 +677,13 @@ try {
     document.querySelectorAll('.tab').forEach(b => b.setAttribute('aria-current', b.dataset.tab === view.tab ? 'page' : 'false'));
     document.querySelectorAll('[data-n]').forEach(n => {
       const k = n.dataset.n;
-      const c = k === 'all' ? up.length : k === 'flyers' ? up.filter(e => e.flyer).length : up.filter(e => inCom(e, k)).length;
+      const c = k === 'all' ? up.length : k === 'flyers' ? up.filter(e => e.flyer).length : 0;
       n.textContent = c; n.hidden = !state.ready.events;
     });
+    $('#comrow').innerHTML = ['all', ...COMS].map(k => {
+      const c = k === 'all' ? up.length : up.filter(e => inCom(e, k)).length;
+      return `<button class="cchip${k === 'all' ? '' : ' c-' + k}" data-action="com" data-com="${k}" aria-pressed="${view.com === k}">${k === 'all' ? '' : '<i></i>'}${k === 'all' ? 'All committees' : esc(k === 'wow' ? 'Week of Welcome (WOW)' : COMMITTEES[k])}${state.ready.events ? ` <span class="n">${c}</span>` : ''}</button>`;
+    }).join('');
     const live = $('#live');
     live.textContent = state.failed ? 'Offline' : state.db ? (state.ready.events && state.ready.signups ? 'Live' : 'Connecting') : (state.dbChecked ? 'Offline' : 'Connecting');
     live.classList.toggle('on', !!(state.db && state.ready.events && state.ready.signups && !state.failed));
@@ -669,7 +696,7 @@ try {
 
     const isCal = view.tab === 'calendar';
     const isFly = view.tab === 'flyers';
-    const scoped = view.tab === 'all' || isCal || isFly ? list : list.filter(e => inCom(e, view.tab));
+    const scoped = view.com === 'all' ? list : list.filter(e => inCom(e, view.com));
     const pastCount = scoped.filter(e => (e.date && e.date < t)).length;
     const todoCount = scoped.filter(isDraft).length, needCount = scoped.filter(e => needsPeople(e, by[e.id] || [])).length;
     const canW = state.canWrite !== false && !!state.db;
@@ -696,14 +723,14 @@ try {
     } else if (!list.length) {
       html = '<div class="empty"><b>No events yet</b>Use "Add event" to put the first one on the schedule.' + (Object.keys((fb.SEED && fb.SEED.events) || {}).length ? '<p><button class="btn primary" data-action="seed">Load the Fall 2026 schedule</button></p>' : '') + '</div>';
     } else if (isFly) {
-      html = flyersHTML(list, canW);
+      html = flyersHTML(scoped, canW);
     } else if (isCal) {
-      html = calHTML(list, by, me);
+      html = calHTML(scoped, by, me);
     } else if (!items.length) {
       html = view.mine && me
         ? '<div class="empty"><b>Nothing on your list</b>Sign up for an event and it will show up here.</div>'
         : '<div class="empty"><b>Nothing coming up</b>Turn on "Show past events" to see earlier ones, or add a new event.</div>';
-    } else if (view.tab === 'all') {
+    } else if (view.com === 'all') {
       let cur = '';
       html = '<div class="list">';
       for (const ev of items) {
@@ -870,7 +897,7 @@ try {
     const ev = id ? state.events[id] : null;
     $('#m-title').textContent = ev ? 'Edit event' : 'Add event';
     F('f-title').value = ev ? ev.title : '';
-    F('f-committee').value = ev ? ev.committee : (COMMITTEES[view.tab] ? view.tab : 'cohort');
+    F('f-committee').value = ev ? ev.committee : (COMMITTEES[view.com] ? view.com : 'cohort');
     F('f-date').value = ev ? ev.date : (presetDate || '');
     F('f-start').value = ev ? ev.start || '' : '';
     F('f-end').value = ev ? ev.end || '' : '';
@@ -1193,9 +1220,20 @@ try {
   }
 
   /* ---------- events ---------- */
+  const hashOf = () => view.tab === 'all' && view.com !== 'all' ? view.com : view.tab;
+  function applyHash() {
+    const h = location.hash.slice(1);
+    if (TABS.includes(h)) { view.tab = h; }
+    else if (COMS.includes(h)) { view.tab = 'all'; view.com = h; }
+  }
   function setTab(tab) {
     view.tab = TABS.includes(tab) ? tab : 'all';
-    if (location.hash.slice(1) !== view.tab) location.hash = view.tab;
+    if (location.hash.slice(1) !== hashOf()) location.hash = hashOf();
+    render();
+  }
+  function setCom(k) {
+    view.com = k === 'all' || COMS.includes(k) ? k : 'all';
+    if (location.hash.slice(1) !== hashOf()) location.hash = hashOf();
     render();
   }
   function calMove(n) {
@@ -1218,10 +1256,11 @@ try {
     if (el) {
       const a = el.dataset.action;
       if (a === 'tab') setTab(el.dataset.tab);
+      else if (a === 'com') setCom(el.dataset.com);
       else if (a === 'open') {
         const ev = state.events[el.dataset.id]; if (!ev) return;
         if (el.dataset.cal && isMobile()) { view.calSel = ev.date; render(); return; }
-        view.focusId = el.dataset.id; view.showPast = view.showPast || ev.date < today(); setTab(ev.committee);
+        view.focusId = el.dataset.id; view.showPast = view.showPast || !!(ev.date && ev.date < today()); view.com = ev.committee; setTab('all');
       }
       else if (a === 'signup') openFlow(el.dataset.id, el.dataset.role);
       else if (a === 'avail') openAvail(el.dataset.id);
@@ -1285,8 +1324,8 @@ try {
   $('#modal').addEventListener('mousedown', e => { if (e.target.id === 'modal') closeForm(); });
   $('#smodal').addEventListener('mousedown', e => { if (e.target.id === 'smodal') closeFlow(); });
   $('#flyer-input').addEventListener('change', e => { const f = e.target.files && e.target.files[0]; if (f && flyerTarget) uploadFlyer(flyerTarget, f); });
-  window.addEventListener('hashchange', () => { const t = location.hash.slice(1); if (TABS.includes(t) && t !== view.tab) { view.tab = t; render(); } });
-  view.tab = TABS.includes(location.hash.slice(1)) ? location.hash.slice(1) : 'all';
+  window.addEventListener('hashchange', () => { const a = view.tab + '|' + view.com; applyHash(); if (a !== view.tab + '|' + view.com) render(); });
+  applyHash();
 
   /* ---------- data (Supabase) ---------- */
   render();
